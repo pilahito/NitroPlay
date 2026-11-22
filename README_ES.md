@@ -1,12 +1,12 @@
 # PS5 Remoto: versión en español y temas PlayStation
 
-PS5 Remoto es una versión comunitaria basada en chiaki-ng. Incluye la interfaz en español (710 traducciones), nitidez ajustable en los ajustes de vídeo y 30 estilos visuales en total: 29 temas y el estilo original.
+PS5 Remoto es una versión comunitaria basada en chiaki-ng. Incluye la interfaz en español (710 traducciones), nitidez ajustable en los ajustes de vídeo y 16 estilos visuales en total: 15 temas y el estilo original.
 
 ## Temas
 
-**Consolas:** PS5 clásico, PS4, PS3, PS2 y PlayStation 1 clásico.
+**Consolas:** PS5 clásico y PS4.
 
-**Juegos:** God of War, Marvel's Spider-Man, Horizon, The Last of Us, Ghost of Tsushima, Astro Bot, Gran Turismo, Ratchet & Clank, Returnal, Uncharted, Bloodborne, Demon's Souls, Death Stranding, Crash Bandicoot, Spyro the Dragon, Metal Gear Solid, Final Fantasy VII, Tekken 3, Shadow of the Colossus, ICO, LittleBigPlanet, inFAMOUS, Killzone y Sackboy: A Big Adventure.
+**Juegos:** God of War, Marvel's Spider-Man, Horizon, The Last of Us, Ghost of Tsushima, Astro Bot, Gran Turismo, Ratchet & Clank, Returnal, Uncharted, Bloodborne, Demon's Souls y Death Stranding.
 
 **Original:** chiaki-ng.
 
