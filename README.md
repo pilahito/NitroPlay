@@ -1,4 +1,4 @@
-![PS5 Remoto](gui/res/chiaking-logo.svg)
+![NitroPlay](gui/res/chiaking-logo.svg)
 
 # PS5 Remoto
 
@@ -8,7 +8,7 @@ Cliente comunitario de juego remoto para PlayStation 4 y PlayStation 5, basado e
 
 - Nitidez ajustable desde los ajustes de vídeo.
 - Interfaz en español.
-- 30 estilos visuales en total: 29 temas y el estilo original.
+- 16 estilos visuales: 15 temas inspirados en PlayStation y el estilo original.
 - Fondos ilustrados que solo aparecen en el menú de consolas, nunca sobre la transmisión.
 
 ## Descargas
