@@ -1,25 +1,24 @@
+![PS5 Remoto](gui/res/chiaking-logo.svg)
 
-![chiaki-ng Logo](gui/res/chiaking-logo.svg)
+# PS5 Remoto
 
-# [chiaki-ng](https://chiaki-ng.github.io/chiaki-ng/)
+Cliente comunitario de juego remoto para PlayStation 4 y PlayStation 5, basado en [chiaki-ng](https://github.com/chiaki-ng/chiaki-ng). Este repositorio reúne una interfaz en español, control de nitidez y temas visuales originales inspirados en distintas generaciones de PlayStation.
 
-An open source PlayStation remote play project serving as the next-generation of Chiaki with improvements and ongoing support now that the original Chiaki project is in maintenance mode only. [Click here to see the accompanying site for documentation, updates and more](https://chiaki-ng.github.io/chiaki-ng/).
+## Esta versión incluye
 
-## Discord
-[chiaki-ng community Discord](https://discord.gg/tAMbRuwXDH)
+- Nitidez ajustable desde los ajustes de vídeo.
+- Interfaz en español.
+- 30 estilos visuales en total: 29 temas y el estilo original.
+- Fondos ilustrados que solo aparecen en el menú de consolas, nunca sobre la transmisión.
 
-## Official downloads
-Only download chiaki-ng from these sources:
+## Descargas
 
-- [GitHub Releases](https://github.com/chiaki-ng/chiaki-ng/releases)
-- [Flathub](https://flathub.org/apps/io.github.streetpea.Chiaki4deck)
-- winget: `winget install --id=StreetPea.chiaki-ng -e`
-- Homebrew: `brew install --cask streetpea/streetpea/chiaki-ng`
+Todavía no hay paquetes binarios publicados en este repositorio. Cuando haya una versión, aparecerá en [Releases de NitroPlay](https://github.com/pilahito/NitroPlay/releases).
 
-Other websites offering chiaki-ng downloads, such as chiaki-ng.com, are not run by this project, and we can't vouch for the files they serve.
+## Compilación
 
-## Disclaimer
-This project is not endorsed or certified by Sony Interactive Entertainment LLC.
+Consulta la guía en español: [README_ES.md](README_ES.md).
 
-Chiaki is a Free and Open Source Software Client for PlayStation 4 and PlayStation 5 Remote Play
-for Linux, FreeBSD, OpenBSD, Android, macOS, Windows, Nintendo Switch and potentially even more platforms.
+## Créditos y marcas
+
+PS5 Remoto es un proyecto comunitario no oficial basado en chiaki-ng. No está afiliado, patrocinado ni certificado por Sony Interactive Entertainment. Chiaki-ng y sus colaboradores originales mantienen sus propios canales y publicaciones.
