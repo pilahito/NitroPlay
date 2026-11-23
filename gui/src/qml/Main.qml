@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Material
 
+import "ThemeColors.js" as ThemeColors
 import org.streetpea.chiaking
 
 Item {
@@ -63,9 +64,9 @@ Item {
         category: "theme"
         property string current: "ps5"
         // colores del tema «Personalizado», editables en Configuración > General
-        property string customAccent: "#53b5ff"
-        property string customBackground: "#0b0d12"
-        property string customPrimary: "#17243a"
+        property string customAccent: ThemeColors.defaults.accent
+        property string customBackground: ThemeColors.defaults.background
+        property string customPrimary: ThemeColors.defaults.primary
     }
     // todos los temas: los de serie más el personalizado (se recalcula al cambiar sus colores)
     readonly property var themes: Object.assign({
@@ -85,6 +86,18 @@ Item {
         else if (role === "primary") themeSettings.customPrimary = valor;
         themeSettings.current = "custom";
     }
+    // Restablece los tres colores del tema Personalizado a los de partida.
+    function resetCustomColors() {
+        themeSettings.customAccent = ThemeColors.defaults.accent;
+        themeSettings.customBackground = ThemeColors.defaults.background;
+        themeSettings.customPrimary = ThemeColors.defaults.primary;
+    }
+    readonly property bool customColorsAreDefault: themeSettings.customAccent === ThemeColors.defaults.accent
+        && themeSettings.customBackground === ThemeColors.defaults.background
+        && themeSettings.customPrimary === ThemeColors.defaults.primary
+    // Aviso de poco contraste solo cuando el tema activo es el Personalizado.
+    readonly property string customContrastWarning: themeSettings.current === "custom"
+        ? ThemeColors.warning(themeSettings.customBackground, themeSettings.customAccent) : ""
     readonly property string currentThemeKey: themes[themeSettings.current] ? themeSettings.current : "ps5"
     readonly property var currentTheme: themes[currentThemeKey]
     function setTheme(key) { if (themes[key]) themeSettings.current = key; }

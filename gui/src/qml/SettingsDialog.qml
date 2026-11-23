@@ -566,6 +566,32 @@ DialogView {
                         }
 
                         Label {
+                            Layout.alignment: Qt.AlignRight | Qt.AlignTop
+                            text: qsTr("Custom theme:")
+                        }
+
+                        ColumnLayout {
+                            spacing: 8
+                            C.Button {
+                                text: qsTr("Reset custom colors")
+                                enabled: !root.customColorsAreDefault
+                                Material.roundedScale: Material.SmallScale
+                                onClicked: root.resetCustomColors()
+                            }
+                            Label {
+                                Layout.preferredWidth: 400
+                                visible: root.customContrastWarning !== ""
+                                wrapMode: Text.WordWrap
+                                color: Material.color(Material.Orange)
+                                text: root.customContrastWarning === "background"
+                                    ? qsTr("Low contrast: the text will be hard to read on this background color.")
+                                    : qsTr("Low contrast: the accent color is hard to tell apart from the background.")
+                            }
+                        }
+
+                        Item {}
+
+                        Label {
                             Layout.alignment: Qt.AlignRight
                             text: qsTr("Steam Deck Haptics:")
                             visible: (typeof Chiaki.settings.steamDeckHaptics !== "undefined")
