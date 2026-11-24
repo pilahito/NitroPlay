@@ -541,6 +541,22 @@ DialogView {
                         }
 
                         Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("Marco del tema:")
+                        }
+
+                        C.CheckBox {
+                            text: qsTr("Rodear la partida con el dibujo del tema")
+                            checked: Chiaki.window.themeFrame
+                            onToggled: Chiaki.window.themeFrame = checked
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("(Sin marcar)")
+                        }
+
+                        Label {
                             Layout.columnSpan: 3
                             Layout.alignment: Qt.AlignLeft
                             Layout.topMargin: 22

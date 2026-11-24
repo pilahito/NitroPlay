@@ -544,6 +544,22 @@ void QmlSettings::setAudioVolume(int volume)
     emit audioVolumeChanged();
 }
 
+void QmlSettings::toggleAudioMute()
+{
+    const int volume = audioVolume();
+    if (volume > 0) {
+        volume_before_mute = volume;
+        setAudioVolume(0);
+    } else {
+        setAudioVolume(volume_before_mute > 0 ? volume_before_mute : 128);
+    }
+}
+
+void QmlSettings::changeAudioVolume(int delta)
+{
+    setAudioVolume(qBound(0, audioVolume() + delta, 128));
+}
+
 QString QmlSettings::audioInDevice() const
 {
     return settings->GetAudioInDevice();

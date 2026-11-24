@@ -2871,6 +2871,15 @@ void QmlMainWindow::setVideoMode(VideoMode mode)
     emit videoModeChanged();
 }
 
+void QmlMainWindow::setThemeFrame(bool enabled)
+{
+    if (theme_frame.load() == enabled)
+        return;
+    theme_frame.store(enabled);
+    QSettings().setValue("theme/frame", enabled);
+    emit themeFrameChanged();
+}
+
 float QmlMainWindow::zoomFactor() const
 {
     return zoom_factor;
@@ -4853,6 +4862,7 @@ void QmlMainWindow::doneOpenGLContextCurrent()
 
 void QmlMainWindow::init(Settings *settings, bool exit_app_on_stream_exit)
 {
+    theme_frame.store(QSettings().value("theme/frame", false).toBool());
     bypass_frame_queue = settings->GetDirectFrameMapping();
     render_backend = settings->GetRenderBackend();
     setSurfaceType(render_backend == RenderBackend::Vulkan ? QWindow::VulkanSurface : QWindow::OpenGLSurface);
@@ -7527,6 +7537,9 @@ void QmlMainWindow::render()
         switch (video_mode) {
         case VideoMode::Normal:
             pl_rect2df_aspect_copy(&target_frame.crop, &crop, 0.0);
+            // leave room around the game for the theme frame drawn by StreamView
+            if (theme_frame.load())
+                pl_rect2df_stretch(&target_frame.crop, themeFrameScale(), themeFrameScale());
             break;
         case VideoMode::Stretch:
             // Nothing to do, target.crop already covers the full image

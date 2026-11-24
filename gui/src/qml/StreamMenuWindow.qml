@@ -128,7 +128,7 @@ Window {
                 value: Chiaki.settings.audioVolume
                 onMoved: Chiaki.settings.audioVolume = value
                 KeyNavigation.left: closeButton
-                KeyNavigation.right: muteButton
+                KeyNavigation.right: soundButton
                 Keys.onEscapePressed: streamMenuWindow.closeRequested()
 
                 Label {
@@ -147,15 +147,28 @@ Window {
             }
 
             ToolButton {
+                id: soundButton
+                text: Chiaki.settings.audioVolume > 0 ? qsTr("Silenciar") : qsTr("Activar sonido")
+                padding: 10
+                checkable: false
+                palette.buttonText: Chiaki.settings.audioVolume > 0 ? undefined : "#ff5c5c"
+                onClicked: Chiaki.settings.toggleAudioMute()
+                KeyNavigation.left: volumeSlider
+                KeyNavigation.right: muteButton
+                Keys.onReturnPressed: clicked()
+                Keys.onEscapePressed: streamMenuWindow.closeRequested()
+            }
+
+            ToolButton {
                 id: muteButton
                 Layout.rightMargin: 20
-                text: qsTr("Mic")
+                text: qsTr("Micrófono")
                 padding: 10
                 checkable: true
                 enabled: Chiaki.session && Chiaki.session.connected
                 checked: Chiaki.session && !Chiaki.session.muted
                 onToggled: Chiaki.session.muted = !Chiaki.session.muted
-                KeyNavigation.left: volumeSlider
+                KeyNavigation.left: soundButton
                 KeyNavigation.right: zoomButton
                 Keys.onReturnPressed: toggled()
                 Keys.onEscapePressed: streamMenuWindow.closeRequested()
@@ -364,7 +377,20 @@ Window {
                 palette.buttonText: Chiaki.capture.live ? "#b48cff" : undefined
                 onClicked: Chiaki.capture.toggleLive()
                 KeyNavigation.left: recordButton
+                KeyNavigation.right: frameButton
                 Keys.onReturnPressed: clicked()
+                Keys.onEscapePressed: streamMenuWindow.closeRequested()
+            }
+
+            ToolButton {
+                id: frameButton
+                text: qsTr("Marco")
+                padding: 10
+                checkable: true
+                checked: Chiaki.window.themeFrame
+                onToggled: Chiaki.window.themeFrame = checked
+                KeyNavigation.left: liveButton
+                Keys.onReturnPressed: toggle()
                 Keys.onEscapePressed: streamMenuWindow.closeRequested()
             }
         }

@@ -285,6 +285,9 @@ public:
 
     int audioVolume() const;
     void setAudioVolume(int volume);
+    // silenciar / volver a poner el volumen que había, y subir o bajar a saltos
+    Q_INVOKABLE void toggleAudioMute();
+    Q_INVOKABLE void changeAudioVolume(int delta);
 
     QString audioInDevice() const;
     void setAudioInDevice(const QString &device);
@@ -773,6 +776,7 @@ signals:
 
 private:
     Settings *settings = {};
+    int volume_before_mute = 128;
     QStringList audio_in_devices;
     QStringList audio_out_devices;
 };

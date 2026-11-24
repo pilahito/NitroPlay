@@ -279,6 +279,86 @@ Item {
         }
     }
 
+    // «Marco del tema»: la imagen de la PS5 se encoge (ver themeFrameScale en
+    // QmlMainWindow) y el dibujo del tema la rodea. Son cuatro franjas recortadas
+    // de un mismo fondo, para no tapar la imagen del juego.
+    Item {
+        id: themeFrame
+        anchors.fill: parent
+        z: -1
+        visible: Chiaki.window.themeFrame && Chiaki.window.videoMode == ChiakiWindow.VideoMode.Normal
+                 && Chiaki.window.hasVideo && !sessionError
+        readonly property real fit: Math.min(width / 16, height / 9) * Chiaki.window.themeFrameScale
+        readonly property real videoW: 16 * fit
+        readonly property real videoH: 9 * fit
+        readonly property real videoX: (width - videoW) / 2
+        readonly property real videoY: (height - videoH) / 2
+
+        Repeater {
+            model: [
+                [0, 0, themeFrame.width, themeFrame.videoY],
+                [0, themeFrame.videoY + themeFrame.videoH, themeFrame.width, themeFrame.height - themeFrame.videoY - themeFrame.videoH],
+                [0, themeFrame.videoY, themeFrame.videoX, themeFrame.videoH],
+                [themeFrame.videoX + themeFrame.videoW, themeFrame.videoY, themeFrame.width - themeFrame.videoX - themeFrame.videoW, themeFrame.videoH]
+            ]
+            delegate: Item {
+                required property var modelData
+                x: modelData[0]; y: modelData[1]; width: modelData[2]; height: modelData[3]
+                clip: true
+                GameBackdrop {
+                    x: -parent.x; y: -parent.y
+                    width: themeFrame.width; height: themeFrame.height
+                    themeKey: root.currentThemeKey
+                    themePalette: root.currentTheme
+                    showLabel: false
+                }
+            }
+        }
+
+        // filo del color del tema pegado a la imagen
+        Rectangle {
+            x: themeFrame.videoX - 3; y: themeFrame.videoY - 3
+            width: themeFrame.videoW + 6; height: themeFrame.videoH + 6
+            color: "transparent"
+            radius: 6
+            border.width: 3
+            border.color: root.currentTheme.accent
+        }
+    }
+
+    // volumen del juego desde el teclado: Ctrl+M silencia, Ctrl+↑ / Ctrl+↓ suben y bajan
+    Shortcut { sequence: "Ctrl+M"; onActivated: { Chiaki.settings.toggleAudioMute(); volumeToast.show() } }
+    Shortcut { sequence: "Ctrl+Up"; onActivated: { Chiaki.settings.changeAudioVolume(8); volumeToast.show() } }
+    Shortcut { sequence: "Ctrl+Down"; onActivated: { Chiaki.settings.changeAudioVolume(-8); volumeToast.show() } }
+
+    Rectangle {
+        id: volumeToast
+        function show() { opacity = 1; volumeToastTimer.restart() }
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            top: parent.top
+            topMargin: 40
+        }
+        z: 10
+        opacity: 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+        radius: 14
+        color: "#cc0b0d12"
+        width: volumeToastLabel.implicitWidth + 32
+        height: volumeToastLabel.implicitHeight + 16
+        Label {
+            id: volumeToastLabel
+            anchors.centerIn: parent
+            font.bold: true
+            font.pixelSize: 20
+            text: Chiaki.settings.audioVolume > 0
+                  ? qsTr("Volumen %1 %").arg(Math.round(Chiaki.settings.audioVolume / 128 * 100))
+                  : qsTr("Sonido silenciado")
+        }
+        Timer { id: volumeToastTimer; interval: 1500; onTriggered: volumeToast.opacity = 0 }
+    }
+
     // what is being recorded or sent live, always visible while it happens
     Rectangle {
         anchors {
@@ -539,7 +619,7 @@ Item {
                 value: Chiaki.settings.audioVolume
                 onMoved: Chiaki.settings.audioVolume = value
                 KeyNavigation.left: closeButton
-                KeyNavigation.right: muteButton
+                KeyNavigation.right: soundButton
                 Keys.onEscapePressed: menuController.close()
                 Label {
                     anchors {
@@ -559,15 +639,28 @@ Item {
             }
 
             ToolButton {
+                id: soundButton
+                text: Chiaki.settings.audioVolume > 0 ? qsTr("Silenciar") : qsTr("Activar sonido")
+                padding: 10
+                checkable: false
+                palette.buttonText: Chiaki.settings.audioVolume > 0 ? undefined : "#ff5c5c"
+                onClicked: Chiaki.settings.toggleAudioMute()
+                KeyNavigation.left: volumeSlider
+                KeyNavigation.right: muteButton
+                Keys.onReturnPressed: clicked()
+                Keys.onEscapePressed: menuController.close()
+            }
+
+            ToolButton {
                 id: muteButton
                 Layout.rightMargin: 20
-                text: qsTr("Mic")
+                text: qsTr("Micrófono")
                 padding: 10
                 checkable: true
                 enabled: Chiaki.session && Chiaki.session.connected
                 checked: Chiaki.session && !Chiaki.session.muted
                 onToggled: Chiaki.session.muted = !Chiaki.session.muted
-                KeyNavigation.left: volumeSlider
+                KeyNavigation.left: soundButton
                 KeyNavigation.right: zoomButton
                 Keys.onReturnPressed: toggled()
                 Keys.onEscapePressed: menuController.close()
@@ -798,7 +891,20 @@ Item {
                 palette.buttonText: Chiaki.capture.live ? "#b48cff" : undefined
                 onClicked: Chiaki.capture.toggleLive()
                 KeyNavigation.left: recordButton
+                KeyNavigation.right: frameButton
                 Keys.onReturnPressed: clicked()
+                Keys.onEscapePressed: menuController.close()
+            }
+
+            ToolButton {
+                id: frameButton
+                text: qsTr("Marco")
+                padding: 10
+                checkable: true
+                checked: Chiaki.window.themeFrame
+                onToggled: Chiaki.window.themeFrame = checked
+                KeyNavigation.left: liveButton
+                Keys.onReturnPressed: toggle()
                 Keys.onEscapePressed: menuController.close()
             }
             }

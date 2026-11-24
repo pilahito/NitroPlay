@@ -62,6 +62,9 @@ class QmlMainWindow : public QWindow
     Q_PROPERTY(bool loadingTransitionComplete READ loadingTransitionComplete NOTIFY loadingTransitionCompleteChanged)
     Q_PROPERTY(VideoMode videoMode READ videoMode WRITE setVideoMode NOTIFY videoModeChanged)
     Q_PROPERTY(float ZoomFactor READ zoomFactor WRITE setZoomFactor NOTIFY zoomFactorChanged)
+    // «Marco del tema»: la imagen del juego se encoge un poco y el tema la rodea
+    Q_PROPERTY(bool themeFrame READ themeFrame WRITE setThemeFrame NOTIFY themeFrameChanged)
+    Q_PROPERTY(float themeFrameScale READ themeFrameScale CONSTANT)
     Q_PROPERTY(VideoPreset videoPreset READ videoPreset WRITE setVideoPreset NOTIFY videoPresetChanged)
     Q_PROPERTY(bool directStream READ directStream NOTIFY directStreamChanged)
     Q_PROPERTY(int runtimeRendererBackend READ runtimeRendererBackend CONSTANT)
@@ -123,6 +126,9 @@ public:
     void setVideoMode(VideoMode mode);
 
     float zoomFactor() const;
+    bool themeFrame() const { return theme_frame.load(); }
+    void setThemeFrame(bool enabled);
+    float themeFrameScale() const { return 0.86f; }
     void setZoomFactor(float factor);
 
     double queueDepthAverage() const;
@@ -174,6 +180,7 @@ signals:
     void droppedFramesChanged();
     void keepVideoChanged();
     void videoModeChanged();
+    void themeFrameChanged();
     void zoomFactorChanged();
     void videoPresetChanged();
     void menuRequested();
@@ -321,6 +328,7 @@ private:
     bool going_full = false;
     VideoMode video_mode = VideoMode::Normal;
     float zoom_factor = 0;
+    std::atomic<bool> theme_frame { false };
     VideoPreset video_preset = VideoPreset::HighQuality;
     Settings *settings = {};
 
