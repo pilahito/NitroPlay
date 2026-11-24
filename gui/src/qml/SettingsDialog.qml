@@ -3378,10 +3378,13 @@ DialogView {
         }
     }
 
-    ColorDialog {
-        id: themeColorDialog
-        property string role: "accent"
-        title: qsTr("Choose a color")
-        onAccepted: root.setCustomColor(themeColorDialog.role, themeColorDialog.selectedColor)
+    // el ColorDialog no es un Item: va dentro de un Item para poder declararlo aquí
+    Item {
+        ColorDialog {
+            id: themeColorDialog
+            property string role: "accent"
+            title: qsTr("Choose a color")
+            onAccepted: root.setCustomColor(themeColorDialog.role, themeColorDialog.selectedColor)
+        }
     }
 }
