@@ -93,7 +93,7 @@
     <message>
         <location filename="../src/qml/DisplaySettingsDialog.qml" line="16"/>
         <source>* Defaults in () to right of value or marked with (Default)</source>
-        <translation>* Valores predeterminados entre () a la derecha del valor o marcados con (Predeterminado)</translation>
+        <translation>Entre paréntesis, a la derecha de cada opción: su valor de fábrica</translation>
     </message>
     <message>
         <location filename="../src/qml/DisplaySettingsDialog.qml" line="34"/>
@@ -789,7 +789,7 @@ Esto habilita:
     <message>
         <location filename="../src/qml/PlaceboColorMappingDialog.qml" line="41"/>
         <source>* Defaults in () to right of value or marked with (Default)</source>
-        <translation>* Valores predeterminados entre () a la derecha del valor o marcados con (Predeterminado)</translation>
+        <translation>Entre paréntesis, a la derecha de cada opción: su valor de fábrica</translation>
     </message>
     <message>
         <location filename="../src/qml/PlaceboColorMappingDialog.qml" line="69"/>
@@ -1229,12 +1229,12 @@ Esto habilita:
     <message>
         <location filename="../src/qml/PlaceboSettingsDialog.qml" line="16"/>
         <source>* Defaults in () to right of value or marked with (Default)</source>
-        <translation>* Valores predeterminados entre () a la derecha del valor o marcados con (Predeterminado)</translation>
+        <translation>Entre paréntesis, a la derecha de cada opción: su valor de fábrica</translation>
     </message>
     <message>
         <location filename="../src/qml/PlaceboSettingsDialog.qml" line="44"/>
         <source>Config</source>
-        <translation>Config</translation>
+        <translation>Perfiles</translation>
     </message>
     <message>
         <location filename="../src/qml/PlaceboSettingsDialog.qml" line="49"/>
@@ -2437,7 +2437,7 @@ Esto habilita:
     <message>
         <location filename="../src/qml/SettingsDialog.qml" line="21"/>
         <source>* Defaults in () to right of value or marked with (Default)</source>
-        <translation>* Valores predeterminados entre () a la derecha del valor o marcados con (Predeterminado)</translation>
+        <translation>Entre paréntesis, a la derecha de cada opción: su valor de fábrica</translation>
     </message>
     <message>
         <location filename="../src/qml/SettingsDialog.qml" line="178"/>
@@ -2447,17 +2447,17 @@ Esto habilita:
     <message>
         <location filename="../src/qml/SettingsDialog.qml" line="196"/>
         <source>Video</source>
-        <translation>Vídeo</translation>
+        <translation>Imagen</translation>
     </message>
     <message>
         <location filename="../src/qml/SettingsDialog.qml" line="226"/>
         <source>Stream</source>
-        <translation>Transmisión</translation>
+        <translation>Calidad</translation>
     </message>
     <message>
         <location filename="../src/qml/SettingsDialog.qml" line="255"/>
         <source>Audio/Wifi</source>
-        <translation>Audio/Wifi</translation>
+        <translation>Sonido y red</translation>
     </message>
     <message>
         <location filename="../src/qml/SettingsDialog.qml" line="285"/>
@@ -2467,23 +2467,23 @@ Esto habilita:
     <message>
         <location filename="../src/qml/SettingsDialog.qml" line="315"/>
         <source>Keys</source>
-        <translation>Teclas</translation>
+        <translation>Teclado</translation>
     </message>
     <message>
         <location filename="../src/qml/SettingsDialog.qml" line="345"/>
         <source>Controllers</source>
-        <translation>Controles</translation>
+        <translation>Mando</translation>
     </message>
     <message>
         <location filename="../src/qml/SettingsDialog.qml" line="375"/>
         <location filename="../src/qml/SettingsDialog.qml" line="1243"/>
         <source>Remote</source>
-        <translation>Remoto</translation>
+        <translation>Internet</translation>
     </message>
     <message>
         <location filename="../src/qml/SettingsDialog.qml" line="405"/>
         <source>Config</source>
-        <translation>Config</translation>
+        <translation>Perfiles</translation>
     </message>
     <message>
         <location filename="../src/qml/SettingsDialog.qml" line="468"/>

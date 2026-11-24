@@ -463,40 +463,14 @@ DialogView {
                             rowSpacing: 5
                             columnSpacing: 20
 
-                            Label {
-                                Layout.alignment: Qt.AlignRight
-                                text: qsTr("Action On Disconnect:")
-                            }
-
-                        C.ComboBox {
-                            id: disconnectAction
-                            Layout.preferredWidth: 400
-                            firstInFocusChain: true
-                            model: [qsTr("Do Nothing"), qsTr("Enter Sleep Mode"), qsTr("Ask")]
-                            currentIndex: Chiaki.settings.disconnectAction
-                            onActivated: index => Chiaki.settings.disconnectAction = index
-                        }
-
                         Label {
-                            Layout.alignment: Qt.AlignRight
-                            text: qsTr("(Ask)")
-                        }
-
-                        Label {
-                            Layout.alignment: Qt.AlignRight
-                            text: qsTr("Action On Suspend:")
-                        }
-
-                        C.ComboBox {
-                            Layout.preferredWidth: 400
-                            model: [qsTr("Do Nothing"), qsTr("Enter Sleep Mode")]
-                            currentIndex: Chiaki.settings.suspendAction
-                            onActivated: index => Chiaki.settings.suspendAction = index
-                        }
-
-                        Label {
-                            Layout.alignment: Qt.AlignRight
-                            text: qsTr("(Do Nothing)")
+                            Layout.columnSpan: 3
+                            Layout.alignment: Qt.AlignLeft
+                            Layout.topMargin: 6
+                            text: qsTr("Apariencia")
+                            font.bold: true
+                            font.pixelSize: 22
+                            color: Material.accent
                         }
 
                         Label {
@@ -505,11 +479,12 @@ DialogView {
                         }
 
                         C.ComboBox {
-                            readonly property var keys: root.themeKeys
+                            // no llamarla «keys»: ese es el id de la pestaña Teclas y lo taparía
+                            readonly property var themeKeyList: root.themeKeys
                             Layout.preferredWidth: 400
-                            model: keys.map(k => root.themes[k].name)
-                            currentIndex: Math.max(0, keys.indexOf(root.currentThemeKey))
-                            onActivated: index => root.setTheme(keys[index])
+                            model: themeKeyList.map(k => root.themes[k].name)
+                            currentIndex: Math.max(0, themeKeyList.indexOf(root.currentThemeKey))
+                            onActivated: index => root.setTheme(themeKeyList[index])
                         }
 
                         GameBackdrop {
@@ -566,68 +541,13 @@ DialogView {
                         }
 
                         Label {
-                            Layout.alignment: Qt.AlignRight
-                            text: qsTr("Steam Deck Haptics:")
-                            visible: (typeof Chiaki.settings.steamDeckHaptics !== "undefined")
-                        }
-
-                        C.CheckBox {
-                            text: qsTr("True haptics for SteamDeck, better quality but noisier")
-                            checked: {
-                                if(typeof Chiaki.settings.steamDeckHaptics !== "undefined")
-                                    Chiaki.settings.steamDeckHaptics
-                                else
-                                    false
-                            }
-                            onToggled: Chiaki.settings.steamDeckHaptics = checked
-                            visible: (typeof Chiaki.settings.steamDeckHaptics !== "undefined")
-                        }
-
-                        Label {
-                            Layout.alignment: Qt.AlignRight
-                            text: qsTr("(Unchecked)")
-                            visible: (typeof Chiaki.settings.steamDeckHaptics !== "undefined")
-                        }
-
-                        Label {
-                            Layout.alignment: Qt.AlignRight
-                            text: qsTr("Steam Deck Vertical:")
-                            visible: typeof Chiaki.settings.verticalDeck !== "undefined"
-                        }
-
-                        C.CheckBox {
-                            text: qsTr("Use Steam Deck in vertical orientation (motion controls)")
-                            checked: {
-                                if(typeof Chiaki.settings.verticalDeck !== "undefined")
-                                    Chiaki.settings.verticalDeck
-                                else
-                                    false
-                            }
-                            onToggled: Chiaki.settings.verticalDeck = checked
-                            visible: typeof Chiaki.settings.verticalDeck !== "undefined"
-                        }
-
-                        Label {
-                            Layout.alignment: Qt.AlignRight
-                            text: qsTr("(Unchecked)")
-                            visible: typeof Chiaki.settings.verticalDeck !== "undefined"
-                        }
-
-                        Label {
-                            Layout.alignment: Qt.AlignRight
-                            text: qsTr("Audio/Video:")
-                        }
-
-                        C.ComboBox {
-                            Layout.preferredWidth: 400
-                            model: [qsTr("Audio and Video Enabled"), qsTr("Audio Disabled"), qsTr("Video Disabled"), qsTr("Audio and Video Disabled")]
-                            currentIndex: Chiaki.settings.audioVideoDisabled
-                            onActivated: index => Chiaki.settings.audioVideoDisabled = index
-                        }
-
-                        Label {
-                            Layout.alignment: Qt.AlignRight
-                            text: qsTr("(Audio and Video Enabled)")
+                            Layout.columnSpan: 3
+                            Layout.alignment: Qt.AlignLeft
+                            Layout.topMargin: 22
+                            text: qsTr("Grabar y emitir")
+                            font.bold: true
+                            font.pixelSize: 22
+                            color: Material.accent
                         }
 
                         Label {
@@ -700,6 +620,127 @@ DialogView {
                         Label {
                             Layout.alignment: Qt.AlignRight
                             text: qsTr("(no la compartas con nadie)")
+                        }
+
+                        Label {
+                            Layout.columnSpan: 3
+                            Layout.alignment: Qt.AlignLeft
+                            Layout.topMargin: 22
+                            text: qsTr("Al terminar la partida")
+                            font.bold: true
+                            font.pixelSize: 22
+                            color: Material.accent
+                        }
+
+                            Label {
+                                Layout.alignment: Qt.AlignRight
+                                text: qsTr("Action On Disconnect:")
+                            }
+
+                        C.ComboBox {
+                            id: disconnectAction
+                            Layout.preferredWidth: 400
+                            firstInFocusChain: true
+                            model: [qsTr("Do Nothing"), qsTr("Enter Sleep Mode"), qsTr("Ask")]
+                            currentIndex: Chiaki.settings.disconnectAction
+                            onActivated: index => Chiaki.settings.disconnectAction = index
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("(Ask)")
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("Action On Suspend:")
+                        }
+
+                        C.ComboBox {
+                            Layout.preferredWidth: 400
+                            model: [qsTr("Do Nothing"), qsTr("Enter Sleep Mode")]
+                            currentIndex: Chiaki.settings.suspendAction
+                            onActivated: index => Chiaki.settings.suspendAction = index
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("(Do Nothing)")
+                        }
+
+                        Label {
+                            Layout.columnSpan: 3
+                            Layout.alignment: Qt.AlignLeft
+                            Layout.topMargin: 22
+                            text: qsTr("Avanzado")
+                            font.bold: true
+                            font.pixelSize: 22
+                            color: Material.accent
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("Audio/Video:")
+                        }
+
+                        C.ComboBox {
+                            Layout.preferredWidth: 400
+                            model: [qsTr("Audio and Video Enabled"), qsTr("Audio Disabled"), qsTr("Video Disabled"), qsTr("Audio and Video Disabled")]
+                            currentIndex: Chiaki.settings.audioVideoDisabled
+                            onActivated: index => Chiaki.settings.audioVideoDisabled = index
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("(Audio and Video Enabled)")
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("Steam Deck Haptics:")
+                            visible: (typeof Chiaki.settings.steamDeckHaptics !== "undefined")
+                        }
+
+                        C.CheckBox {
+                            text: qsTr("True haptics for SteamDeck, better quality but noisier")
+                            checked: {
+                                if(typeof Chiaki.settings.steamDeckHaptics !== "undefined")
+                                    Chiaki.settings.steamDeckHaptics
+                                else
+                                    false
+                            }
+                            onToggled: Chiaki.settings.steamDeckHaptics = checked
+                            visible: (typeof Chiaki.settings.steamDeckHaptics !== "undefined")
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("(Unchecked)")
+                            visible: (typeof Chiaki.settings.steamDeckHaptics !== "undefined")
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("Steam Deck Vertical:")
+                            visible: typeof Chiaki.settings.verticalDeck !== "undefined"
+                        }
+
+                        C.CheckBox {
+                            text: qsTr("Use Steam Deck in vertical orientation (motion controls)")
+                            checked: {
+                                if(typeof Chiaki.settings.verticalDeck !== "undefined")
+                                    Chiaki.settings.verticalDeck
+                                else
+                                    false
+                            }
+                            onToggled: Chiaki.settings.verticalDeck = checked
+                            visible: typeof Chiaki.settings.verticalDeck !== "undefined"
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("(Unchecked)")
+                            visible: typeof Chiaki.settings.verticalDeck !== "undefined"
                         }
 
                         Label {
