@@ -788,7 +788,7 @@ QVariantList QmlBackend::hosts() const
         if(registered && hidden)
         {
             settings->RemoveHiddenHost(host_mac);
-            bool hidden = false;
+            hidden = false;
         }
         // Update hidden host nickname if it's changed
         if(hidden)

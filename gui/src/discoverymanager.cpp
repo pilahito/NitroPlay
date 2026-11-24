@@ -18,6 +18,19 @@
 #include <ifaddrs.h>
 #endif
 
+#include <QElapsedTimer>
+#include <QFutureWatcher>
+#include <QSet>
+#include <QtConcurrent>
+#ifndef _WIN32
+#include <arpa/inet.h>
+#include <poll.h>
+#include <unistd.h>
+#endif
+
+#define SWEEP_FIRST_MS	3000
+#define SWEEP_EVERY_MS	30000
+
 #define PING_MS		500
 #define HOSTS_MAX	16
 #define DROP_PINGS	3
@@ -42,6 +55,9 @@ DiscoveryManager::DiscoveryManager(QObject *parent) : QObject(parent)
 
 	service_active = false;
 	service_active_ipv6 = false;
+
+	sweep_timer.setInterval(SWEEP_EVERY_MS);
+	connect(&sweep_timer, &QTimer::timeout, this, &DiscoveryManager::SweepForMissingConsoles);
 }
 
 DiscoveryManager::~DiscoveryManager()
@@ -240,9 +256,12 @@ void DiscoveryManager::SetActive(bool active)
 		}
 
 		UpdateManualServices();
+		QTimer::singleShot(SWEEP_FIRST_MS, this, &DiscoveryManager::SweepForMissingConsoles);
+		sweep_timer.start();
 	}
 	else
 	{
+		sweep_timer.stop();
 		if(service_active)
 		{
 			chiaki_discovery_service_fini(&service);
@@ -319,6 +338,130 @@ void DiscoveryManager::DiscoveryServiceHosts(QList<DiscoveryHost> hosts)
 	emit HostsUpdated();
 }
 
+// Asks every address of the local IPv4 networks for a PlayStation and returns
+// host-id (lowercase hex, the console's registered MAC) -> address.
+static QHash<QString, QString> SweepLocalNetworks()
+{
+	QHash<QString, QString> found;
+#ifndef _WIN32
+	struct ifaddrs *local_addrs;
+	if(getifaddrs(&local_addrs) != 0)
+		return found;
+	QSet<uint32_t> targets;
+	for(struct ifaddrs *a = local_addrs; a; a = a->ifa_next)
+	{
+		if(!a->ifa_addr || !a->ifa_netmask || a->ifa_addr->sa_family != AF_INET)
+			continue;
+		if((a->ifa_flags & (IFF_UP|IFF_RUNNING|IFF_LOOPBACK)) != (IFF_UP|IFF_RUNNING))
+			continue;
+		uint32_t ip = ntohl(((struct sockaddr_in *)a->ifa_addr)->sin_addr.s_addr);
+		uint32_t mask = ntohl(((struct sockaddr_in *)a->ifa_netmask)->sin_addr.s_addr);
+		if(mask < 0xfffffc00) // larger than /22: only the own /24
+			mask = 0xffffff00;
+		uint32_t net = ip & mask;
+		for(uint32_t h = net + 1; h < (net | ~mask); h++)
+			if(h != ip)
+				targets.insert(h);
+	}
+	freeifaddrs(local_addrs);
+
+	int fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if(fd < 0)
+		return found;
+	static const char srch_ps5[] = "SRCH * HTTP/1.1\ndevice-discovery-protocol-version:00030010\n";
+	static const char srch_ps4[] = "SRCH * HTTP/1.1\ndevice-discovery-protocol-version:00020020\n";
+	for(uint32_t target : std::as_const(targets))
+	{
+		struct sockaddr_in to = {};
+		to.sin_family = AF_INET;
+		to.sin_addr.s_addr = htonl(target);
+		to.sin_port = htons(CHIAKI_DISCOVERY_PORT_PS5);
+		sendto(fd, srch_ps5, sizeof(srch_ps5) - 1, 0, (struct sockaddr *)&to, sizeof(to));
+		to.sin_port = htons(CHIAKI_DISCOVERY_PORT_PS4);
+		sendto(fd, srch_ps4, sizeof(srch_ps4) - 1, 0, (struct sockaddr *)&to, sizeof(to));
+	}
+
+	QElapsedTimer elapsed;
+	elapsed.start();
+	char buf[2048];
+	while(elapsed.elapsed() < 1500)
+	{
+		struct pollfd p = { fd, POLLIN, 0 };
+		if(poll(&p, 1, int(1500 - elapsed.elapsed())) <= 0)
+			break;
+		struct sockaddr_in from = {};
+		socklen_t from_len = sizeof(from);
+		ssize_t n = recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr *)&from, &from_len);
+		if(n <= 0)
+			continue;
+		const auto lines = QString::fromLatin1(buf, n).split('\n');
+		for(const auto &line : lines)
+		{
+			if(!line.startsWith("host-id:"))
+				continue;
+			char address[INET_ADDRSTRLEN] = {};
+			inet_ntop(AF_INET, &from.sin_addr, address, sizeof(address));
+			found.insert(line.mid(8).trimmed().toLower(), QString::fromLatin1(address));
+		}
+	}
+	close(fd);
+#endif
+	return found;
+}
+
+void DiscoveryManager::SweepForMissingConsoles()
+{
+	if(!settings || !service_active || sweep_running)
+		return;
+
+	QSet<QString> seen;
+	for(const auto &host : GetHosts())
+		seen.insert(host.GetHostMAC().ToString());
+	bool missing = false;
+	for(const auto &host : settings->GetRegisteredHosts())
+		if(!seen.contains(host.GetServerMAC().ToString()))
+			missing = true;
+	if(!missing)
+		return;
+
+	sweep_running = true;
+	auto watcher = new QFutureWatcher<QHash<QString, QString>>(this);
+	connect(watcher, &QFutureWatcherBase::finished, this, [this, watcher]() {
+		sweep_running = false;
+		ApplySweepResults(watcher->result());
+		watcher->deleteLater();
+	});
+	watcher->setFuture(QtConcurrent::run(SweepLocalNetworks));
+}
+
+void DiscoveryManager::ApplySweepResults(const QHash<QString, QString> &found)
+{
+	if(!settings)
+		return;
+	for(const auto &registered : settings->GetRegisteredHosts())
+	{
+		const HostMAC mac = registered.GetServerMAC();
+		const QString address = found.value(mac.ToString());
+		if(address.isEmpty())
+			continue;
+		int id = -1;
+		bool same = false;
+		for(const auto &manual : settings->GetManualHosts())
+		{
+			if(!(manual.GetMAC() == mac))
+				continue;
+			if(manual.GetHost() == address)
+				same = true;
+			else if(id < 0)
+				id = manual.GetID();
+		}
+		if(same)
+			continue;
+		CHIAKI_LOGI(&log, "Found %s at %s by asking the local network directly; saving that address", qPrintable(registered.GetServerNickname()), qPrintable(address));
+		settings->SetManualHost(ManualHost(id, address, true, mac));
+	}
+}
+
 void DiscoveryManager::UpdateManualServices()
 {
 	if(!settings || (!service_active && !service_active_ipv6))
@@ -326,8 +469,12 @@ void DiscoveryManager::UpdateManualServices()
 
 	QSet<QString> hosts;
 	for(const auto &host : settings->GetManualHosts())
-		if(settings->GetRegisteredHostRegistered(host.GetMAC()))
+	{
+		const bool registered = settings->GetRegisteredHostRegistered(host.GetMAC());
+		CHIAKI_LOGI(&log, "Saved console %s: %s", qPrintable(host.GetHost()), registered ? "registered, querying it directly" : "not registered, skipped");
+		if(registered)
 			hosts.insert(host.GetHost());
+	}
 
 	const auto keys = manual_services.keys();
 	for(const auto &key : keys)
@@ -345,7 +492,8 @@ void DiscoveryManager::UpdateManualServices()
 
 		ChiakiDiscoveryServiceOptions options = {};
 		options.ping_ms = PING_MS;
-		options.ping_initial_ms = PING_MS;
+		// Query saved consoles promptly on startup; keep the normal polling interval.
+		options.ping_initial_ms = 100;
 		options.hosts_max = 1;
 		options.host_drop_pings = DROP_PINGS;
 		options.cb = DiscoveryServiceHostsManualCallback;

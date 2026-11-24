@@ -10,6 +10,7 @@
 #include <QObject>
 #include <QList>
 #include <QHash>
+#include <QTimer>
 
 struct DiscoveryHost
 {
@@ -54,6 +55,14 @@ class DiscoveryManager : public QObject
 		QList<DiscoveryHost> hosts;
 		Settings *settings = {};
 		QHash<QString, ManualService*> manual_services;
+
+		// Some routers drop broadcast between Wi-Fi and cable, so a registered
+		// console may never answer the normal search: then every address of the
+		// local network is asked directly and the saved address is updated.
+		QTimer sweep_timer;
+		bool sweep_running = false;
+		void SweepForMissingConsoles();
+		void ApplySweepResults(const QHash<QString, QString> &found);
 
 	private slots:
 		void DiscoveryServiceHosts(QList<DiscoveryHost> hosts);
