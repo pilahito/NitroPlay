@@ -166,7 +166,6 @@ set_target_properties(chiaki PROPERTIES
 install(TARGETS chiaki
 		RUNTIME DESTINATION bin
 		BUNDLE DESTINATION bin)
-install(FILES chiaking.desktop DESTINATION share/applications)
-install(FILES chiaking.png DESTINATION share/icons/hicolor/512x512/apps)
-install(FILES res/chiaking.svg DESTINATION share/icons/hicolor/scalable/apps)
+install(FILES nitroplay.desktop DESTINATION share/applications)
+install(FILES res/nitroplay-icon.svg DESTINATION share/icons/hicolor/scalable/apps RENAME nitroplay.svg)
 install(FILES io.github.streetpea.Chiaki4deck.appdata.xml DESTINATION share/metainfo)

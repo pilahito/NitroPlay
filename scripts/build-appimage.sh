@@ -98,7 +98,7 @@ done
 ./linuxdeploy-${ARCH}.AppImage \
     --appdir="${appdir}" \
     -e "${appdir}/usr/bin/chiaki" \
-    -d "${appdir}/usr/share/applications/chiaking.desktop" \
+    -d "${appdir}/usr/share/applications/nitroplay.desktop" \
     "${NSS_MODULE_ARGS[@]}" \
     --plugin qt \
     --exclude-library='libva*' \

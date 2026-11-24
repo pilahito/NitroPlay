@@ -100,7 +100,7 @@ int real_main(int argc, char *argv[])
 		QGuiApplication::setDesktopFileName(qEnvironmentVariable("FLATPAK_ID"));
 	else
 #endif
-		QGuiApplication::setDesktopFileName("chiaking");
+		QGuiApplication::setDesktopFileName("nitroplay");
 
 	qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--disable-gpu");
 #if defined(Q_OS_WIN)

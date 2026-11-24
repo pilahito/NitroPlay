@@ -53,7 +53,7 @@ then
     ./qemu-aarch64-static ./linuxdeploy-${ARCH}.AppImage \
         --appdir="${appdir}" \
         -e "${appdir}/usr/bin/chiaki" \
-        -d "${appdir}/usr/share/applications/chiaking.desktop" \
+        -d "${appdir}/usr/share/applications/nitroplay.desktop" \
         --exclude-library='libva*' \
         --exclude-library='libvulkan*' \
         --exclude-library='libhidapi*'
@@ -63,7 +63,7 @@ else
     ./linuxdeploy-${ARCH}.AppImage \
         --appdir="${appdir}" \
         -e "${appdir}/usr/bin/chiaki" \
-        -d "${appdir}/usr/share/applications/chiaking.desktop" \
+        -d "${appdir}/usr/share/applications/nitroplay.desktop" \
         --plugin qt \
         --exclude-library='libva*' \
         --exclude-library='libvulkan*' \
