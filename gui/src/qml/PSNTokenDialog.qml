@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Material
 
-import org.streetpea.chiaking
+import org.nitroplay
 
 import "controls" as C
 
@@ -243,7 +243,7 @@ DialogView {
                         web = Qt.createQmlObject("
                         import QtWebEngine
                         import QtQuick.Controls
-                        import org.streetpea.chiaking
+                        import org.nitroplay
                         WebEngineView {
                             profile {
                                 offTheRecord: false

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Effects
 
-import org.streetpea.chiaking
+import org.nitroplay
 
 // Original vector motifs inspired by the selected game, drawn only in
 // the console browser. No animation or decoration covers the video stream.

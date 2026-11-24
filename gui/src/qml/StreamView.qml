@@ -4,7 +4,7 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Window
 
-import org.streetpea.chiaking
+import org.nitroplay
 
 import "controls" as C
 
