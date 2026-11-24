@@ -479,21 +479,51 @@ DialogView {
                         }
 
                         C.ComboBox {
+                            id: themeCombo
                             // no llamarla «keys»: ese es el id de la pestaña Teclas y lo taparía
                             readonly property var themeKeyList: root.themeKeys
                             Layout.preferredWidth: 400
                             model: themeKeyList.map(k => root.themes[k].name)
                             currentIndex: Math.max(0, themeKeyList.indexOf(root.currentThemeKey))
                             onActivated: index => root.setTheme(themeKeyList[index])
+                            // cada tema de la lista con la foto de su juego
+                            delegate: ItemDelegate {
+                                required property int index
+                                required property string modelData
+                                width: ListView.view ? ListView.view.width : 400
+                                contentItem: RowLayout {
+                                    spacing: 12
+                                    GameBackdrop {
+                                        Layout.preferredWidth: 96
+                                        Layout.preferredHeight: 54
+                                        themeKey: themeCombo.themeKeyList[index]
+                                        themePalette: root.themes[themeCombo.themeKeyList[index]]
+                                        showLabel: false
+                                        showPoster: false
+                                        compact: true
+                                        clip: true
+                                        radius: 4
+                                    }
+                                    Label {
+                                        Layout.fillWidth: true
+                                        text: modelData
+                                        font.bold: themeCombo.themeKeyList[index] === root.currentThemeKey
+                                        elide: Text.ElideRight
+                                    }
+                                }
+                            }
                         }
 
                         GameBackdrop {
-                            Layout.preferredWidth: 140
-                            Layout.preferredHeight: 72
+                            Layout.preferredWidth: 192
+                            Layout.preferredHeight: 108
                             themeKey: root.currentThemeKey
                             themePalette: root.currentTheme
                             showLabel: false
+                            showPoster: false
+                            compact: true
                             clip: true
+                            radius: 6
                         }
 
                         Label {

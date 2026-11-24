@@ -12,6 +12,11 @@ Rectangle {
     property bool showLabel: true
     // portada nítida del juego abierto a un lado (solo en pantallas grandes)
     property bool showPoster: true
+    // miniatura (vista previa en Ajustes): la foto del juego nítida, sin difuminar
+    property bool compact: false
+    // movimiento suave de la foto (no en miniaturas)
+    property bool animated: !compact
+    clip: true
     // con un juego abierto en la PS5, el fondo toma su portada y su color
     readonly property bool gameArt: Chiaki.gameArt.active
     readonly property color accentColor: gameArt ? Chiaki.gameArt.accent : themePalette.accent
@@ -37,44 +42,66 @@ Rectangle {
         opacity: 0.4
     }
 
-    // imagen que el usuario ha elegido para este tema (Ajustes → Apariencia)
-    Image {
-        id: themeImage
+    // la foto del tema (la del usuario o la del juego), con un movimiento lento
+    // de acercamiento y desplazamiento
+    Item {
+        id: artLayer
         anchors.fill: parent
-        readonly property string url: backdrop.userImage
-        source: url ? url + "?r=" + Chiaki.settings.themeImagesRevision : ""
-        visible: url !== "" && status === Image.Ready && !backdrop.gameArt
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
-        cache: false
-        sourceSize.width: 2560
-        opacity: 0.75
-    }
+        property real drift: 0
+        transform: [
+            Scale {
+                origin.x: artLayer.width / 2
+                origin.y: artLayer.height / 2
+                xScale: backdrop.animated ? 1.06 + 0.05 * artLayer.drift : 1
+                yScale: xScale
+            },
+            Translate { x: backdrop.animated ? (artLayer.drift - 0.5) * artLayer.width * 0.03 : 0 }
+        ]
+        SequentialAnimation on drift {
+            running: backdrop.animated && (themeImage.visible || backdrop.hasCover)
+            loops: Animation.Infinite
+            NumberAnimation { from: 0; to: 1; duration: 28000; easing.type: Easing.InOutSine }
+            NumberAnimation { from: 1; to: 0; duration: 28000; easing.type: Easing.InOutSine }
+        }
 
-    // portada del juego, ampliada y difuminada como fondo
-    Image {
-        id: gameCover
-        anchors.fill: parent
-        source: backdrop.coverSource
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
-        visible: false
-    }
-    MultiEffect {
-        anchors.fill: parent
-        source: gameCover
-        visible: backdrop.hasCover && gameCover.status === Image.Ready
-        blurEnabled: !backdrop.officialArt
-        blur: 1.0
-        blurMax: 48
-        saturation: backdrop.officialArt ? 0 : 0.15
-        opacity: backdrop.officialArt ? 1 : 0.85
+        Image {
+            id: themeImage
+            anchors.fill: parent
+            readonly property string url: backdrop.userImage
+            source: url ? url + "?r=" + Chiaki.settings.themeImagesRevision : ""
+            visible: url !== "" && status === Image.Ready && !backdrop.gameArt
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+            cache: false
+            sourceSize.width: 2560
+            opacity: 0.75
+        }
+
+        // portada del juego, ampliada y difuminada como fondo
+        Image {
+            id: gameCover
+            anchors.fill: parent
+            source: backdrop.coverSource
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+            visible: false
+        }
+        MultiEffect {
+            anchors.fill: parent
+            source: gameCover
+            visible: backdrop.hasCover && gameCover.status === Image.Ready
+            blurEnabled: !backdrop.officialArt && !backdrop.compact
+            blur: 1.0
+            blurMax: 48
+            saturation: backdrop.officialArt || backdrop.compact ? 0 : 0.15
+            opacity: backdrop.officialArt || backdrop.compact ? 1 : 0.85
+        }
     }
 
     // oscurece la imagen para que los textos y botones se sigan leyendo
     Rectangle {
         anchors.fill: parent
-        visible: themeImage.visible || backdrop.hasCover
+        visible: (themeImage.visible || backdrop.hasCover) && !backdrop.compact
         gradient: Gradient {
             GradientStop { position: 0; color: Qt.alpha(backdrop.themePalette.background, 0.35) }
             GradientStop { position: 1; color: Qt.alpha(backdrop.themePalette.background, 0.75) }
@@ -83,9 +110,10 @@ Rectangle {
 
     Canvas {
         id: art
+        // con foto del juego no hace falta el dibujo de líneas
         anchors.fill: parent
         opacity: 0.22
-        visible: backdrop.themeKey !== "chiaki"
+        visible: backdrop.themeKey !== "chiaki" && !themeImage.visible && !backdrop.hasCover
         onWidthChanged: requestPaint()
         onHeightChanged: requestPaint()
         Connections {
