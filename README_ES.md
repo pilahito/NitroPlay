@@ -2,6 +2,8 @@
 
 Cliente comunitario de juego remoto para PlayStation 4 y PlayStation 5, basado en chiaki-ng. Incluye la interfaz en español, nitidez ajustable en Configuración → Vídeo y 42 estilos visuales: 41 temas y el estilo NitroPlay original.
 
+La pantalla de inicio usa la identidad NitroPlay y presenta cada consola en una tarjeta con acceso directo a «Jugar ahora». La conexión por Internet se muestra solo cuando pulsas «Acceso remoto» en la parte inferior; ocultarla no borra el emparejamiento. La búsqueda de consolas se activa con «Buscar consolas en la red». Las direcciones guardadas se consultan antes al iniciar (primer intento a los 100 ms, posteriores cada 500 ms).
+
 
 ## Temas
 
@@ -43,7 +45,11 @@ La compilación depende de las versiones locales de Qt y de las bibliotecas mult
 
 ## Windows y macOS
 
-Todavía no hay paquetes publicados de esta versión para Windows ni macOS. Puedes compilarla desde este repositorio con CMake y Qt 6. La guía general de compilación está en [docs/diy/buildit.md](docs/diy/buildit.md): está en inglés y habla de chiaki-ng, pero el proceso es el mismo en este árbol de código.
+Hay un flujo de compilación de Windows x64 en `.github/workflows/build-windows-x86.yml` que prepara un paquete portátil y un instalador de NitroPlay. El instalador usa un identificador propio para convivir con chiaki-ng y mantiene la configuración de emparejamiento existente. Aún no se ha ejecutado una compilación de Windows de esta revisión, por lo que su funcionamiento debe comprobarse en Windows antes de distribuirla. Para macOS tampoco hay paquete publicado. La guía general de compilación está en [docs/diy/buildit.md](docs/diy/buildit.md).
+
+## HDR en PS5
+
+En **Configuración → Vídeo** selecciona **Vulkan**; en **Transmisión → PS5** selecciona **H265 HDR** para la conexión local y, si lo necesitas, para la conexión por Internet. NitroPlay ya acepta el flujo HDR de la PS5 mediante H.265 y libplacebo adapta la imagen a SDR cuando la salida no es HDR. Para ver HDR real en pantalla deben admitirlo el monitor, el sistema gráfico, el controlador y la salida de vídeo. Esta revisión no fuerza HDR en monitores SDR ni asegura que Windows o Hyprland estén emitiendo en HDR. OpenGL ofrece H.264/H.265 sin HDR.
 
 La documentación original de instalación de chiaki-ng (paquetes de Flathub, Homebrew o Releases) no sirve para instalar NitroPlay: esos paquetes no incluyen la interfaz en español, la nitidez ni los temas de esta versión.
 

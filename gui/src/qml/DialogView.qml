@@ -56,7 +56,7 @@ Item {
             left: parent.left
             right: parent.right
         }
-        height: 80
+        height: 88
 
         RowLayout {
             anchors {
@@ -67,7 +67,7 @@ Item {
 
             Button {
                 Layout.fillHeight: true
-                Layout.preferredWidth: 100
+                Layout.preferredWidth: 72
                 flat: true
                 text: "❮"
                 focusPolicy: Qt.NoFocus
@@ -95,27 +95,27 @@ Item {
             }
         }
 
-        Label {
-            id: titleLabel
+        Column {
             anchors.centerIn: parent
-            horizontalAlignment: Qt.AlignHCenter
-            verticalAlignment: Qt.AlignVCenter
-            font.bold: true
-            font.pixelSize: 26
-        }
-
-        Label {
-            id: headerLabel
-            anchors {
-                top: parent.top
-                left: titleLabel.right
-                right: parent.right
-                verticalCenter: parent.verticalCenter
+            width: Math.max(0, Math.min(parent.width - 180, 760))
+            spacing: 2
+            Label {
+                id: titleLabel
+                width: parent.width
+                horizontalAlignment: Qt.AlignHCenter
+                font.bold: true
+                font.pixelSize: 23
+                elide: Text.ElideRight
             }
-            horizontalAlignment: Qt.AlignHCenter
-            verticalAlignment: Qt.AlignVCenter
-            font.bold: true
-            font.pixelSize: 14
+            Label {
+                id: headerLabel
+                width: parent.width
+                horizontalAlignment: Qt.AlignHCenter
+                color: "#a8bdd7"
+                font.pixelSize: 12
+                elide: Text.ElideRight
+                visible: text.length > 0
+            }
         }
     }
 

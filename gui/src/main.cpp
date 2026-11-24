@@ -158,7 +158,7 @@ int real_main(int argc, char *argv[])
 			app.installTranslator(translator);
 	}
 
-	QGuiApplication::setWindowIcon(QIcon(":/icons/chiaking.svg"));
+	QGuiApplication::setWindowIcon(QIcon(":/icons/nitroplay-icon.svg"));
 
 	QCommandLineParser parser;
 	parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsPositionalArguments);

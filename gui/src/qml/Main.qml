@@ -346,7 +346,7 @@ Item {
                 property: "opacity"
                 from: 0.01
                 to: 1.0
-                duration: 200
+                duration: 120
             }
         }
 
@@ -355,7 +355,7 @@ Item {
                 property: "opacity"
                 from: 1.0
                 to: 0.0
-                duration: 200
+                duration: 120
             }
         }
     }

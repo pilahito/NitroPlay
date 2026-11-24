@@ -167,6 +167,11 @@ DialogView {
     Item {
         TabBar {
             id: bar
+            clip: true
+            onCurrentIndexChanged: {
+                if (contentItem && contentItem.positionViewAtIndex)
+                    contentItem.positionViewAtIndex(currentIndex, ListView.Contain)
+            }
             anchors {
                 top: parent.top
                 left: parent.left
@@ -174,6 +179,7 @@ DialogView {
                 topMargin: 5
             }
             TabButton {
+                width: 164
                 id: general
                 text: qsTr("General")
                 focusPolicy: Qt.NoFocus
@@ -192,6 +198,7 @@ DialogView {
             }
 
             TabButton {
+                width: 164
                 id: video
                 text: qsTr("Video")
                 focusPolicy: Qt.NoFocus
@@ -222,6 +229,7 @@ DialogView {
             }
 
             TabButton {
+                width: 164
                 id: stream
                 text: qsTr("Stream")
                 focusPolicy: Qt.NoFocus
@@ -252,6 +260,7 @@ DialogView {
             }
 
             TabButton {
+                width: 164
                 text: qsTr("Audio/Wifi")
                 id: audio
                 focusPolicy: Qt.NoFocus
@@ -282,6 +291,7 @@ DialogView {
             }
 
             TabButton {
+                width: 164
                 text: qsTr("Consoles")
                 id: consoles
                 focusPolicy: Qt.NoFocus
@@ -312,6 +322,7 @@ DialogView {
             }
 
             TabButton {
+                width: 164
                 text: qsTr("Keys")
                 id: keys
                 focusPolicy: Qt.NoFocus
@@ -342,6 +353,7 @@ DialogView {
             }
 
             TabButton {
+                width: 164
                 text: qsTr("Controllers")
                 id: controllers
                 focusPolicy: Qt.NoFocus
@@ -372,6 +384,7 @@ DialogView {
             }
 
             TabButton {
+                width: 164
                 text: qsTr("Remote")
                 id: remote
                 focusPolicy: Qt.NoFocus
@@ -402,6 +415,7 @@ DialogView {
             }
 
             TabButton {
+                width: 164
                 text: qsTr("Config")
                 id: config
                 focusPolicy: Qt.NoFocus
@@ -1802,6 +1816,18 @@ DialogView {
                                     KeyNavigation.AfterItem
                             }
                         }
+
+                    Label {
+                        Layout.columnSpan: 3
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.maximumWidth: 800
+                        wrapMode: Text.WordWrap
+                        color: "#a8bdd7"
+                        visible: selectedConsole == SettingsDialog.Console.PS5
+                        text: Chiaki.settings.rendererBackend === 1
+                            ? qsTr("Para usar HDR con la PS5, elige Vulkan en la pestaña Vídeo. OpenGL utiliza H.264 o H.265 sin HDR.")
+                            : qsTr("HDR de PS5: selecciona H265 HDR para la red local o para Internet. La salida HDR depende de la pantalla, del sistema y del controlador; en SDR se adapta la imagen.")
+                    }
                     }
                 }
             }
@@ -3410,7 +3436,7 @@ DialogView {
                     Layout.preferredWidth: 200
                     fillMode: Image.PreserveAspectFit
                     verticalAlignment: Image.AlignTop
-                    source: "qrc:icons/chiaking-logo.svg"
+                    source: "qrc:/icons/nitroplay-logo.png"
                 }
 
                 Label {

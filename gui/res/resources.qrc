@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="/icons">
+    <file alias="nitroplay-logo.png">../../assets/nitroplay-logo-transparent.png</file>
+    <file>nitroplay-icon.svg</file>
     <file>settings-20px.svg</file>
     <file>add-24px.svg</file>
     <file>discover-24px.svg</file>
