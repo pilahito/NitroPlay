@@ -286,6 +286,7 @@ QmlBackend::QmlBackend(Settings *settings, QmlMainWindow *window)
     : QObject(window)
     , settings(settings)
     , settings_qml(new QmlSettings(settings, this))
+    , stream_capture(new StreamCapture(this))
     , window(window)
 {
     qt_msg_handler = qInstallMessageHandler(msg_handler);
@@ -522,6 +523,8 @@ void QmlBackend::teardownSession()
 {
     if (!session)
         return;
+    // the game is no longer on screen: finish the video and end the live stream
+    stream_capture->stopAll();
 
     chiaki_log_mutex.lock();
     chiaki_log_ctx = nullptr;

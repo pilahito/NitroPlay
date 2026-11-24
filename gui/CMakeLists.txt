@@ -55,6 +55,8 @@ set(SOURCE_FILES
 	src/qmlsvgprovider.cpp
 	include/systemdinhibit.h
 	src/systemdinhibit.cpp
+	include/streamcapture.h
+	src/streamcapture.cpp
 	)
 set(RESOURCE_FILES "")
 

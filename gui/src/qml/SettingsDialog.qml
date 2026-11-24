@@ -632,6 +632,78 @@ DialogView {
 
                         Label {
                             Layout.alignment: Qt.AlignRight
+                            text: qsTr("Grabaciones:")
+                        }
+
+                        C.Button {
+                            text: qsTr("Abrir carpeta de vídeos")
+                            onClicked: Chiaki.capture.openRecordingsFolder()
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            Layout.maximumWidth: 420
+                            elide: Text.ElideMiddle
+                            text: Chiaki.capture.recordingsFolder
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("Directo en:")
+                        }
+
+                        C.ComboBox {
+                            Layout.preferredWidth: 400
+                            model: [qsTr("Twitch"), qsTr("YouTube"), qsTr("Otro servidor RTMP (Kick, Facebook…)")]
+                            currentIndex: Chiaki.capture.liveService
+                            onActivated: index => Chiaki.capture.liveService = index
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: Chiaki.capture.liveReady ? qsTr("(listo para emitir)") : qsTr("(falta la clave)")
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("Servidor RTMP:")
+                            visible: Chiaki.capture.liveService == 2
+                        }
+
+                        C.TextField {
+                            Layout.preferredWidth: 400
+                            visible: Chiaki.capture.liveService == 2
+                            placeholderText: "rtmp://…"
+                            text: Chiaki.capture.liveUrl
+                            onEditingFinished: Chiaki.capture.liveUrl = text
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("(dirección que te da el servicio)")
+                            visible: Chiaki.capture.liveService == 2
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("Clave de retransmisión:")
+                        }
+
+                        C.TextField {
+                            Layout.preferredWidth: 400
+                            echoMode: TextInput.Password
+                            placeholderText: qsTr("Pégala desde el panel de tu canal")
+                            text: Chiaki.capture.liveKey
+                            onEditingFinished: Chiaki.capture.liveKey = text
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("(no la compartas con nadie)")
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
                             text: qsTr("Log Directory:")
                         }
 

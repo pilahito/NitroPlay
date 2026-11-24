@@ -4,6 +4,7 @@
 #include "discoverymanager.h"
 #include "qmlmainwindow.h"
 #include "qmlcontroller.h"
+#include "streamcapture.h"
 #include "qmlsettings.h"
 
 #include <QObject>
@@ -80,6 +81,7 @@ class QmlBackend : public QObject
     Q_OBJECT
     Q_PROPERTY(QmlMainWindow* window READ qmlWindow CONSTANT)
     Q_PROPERTY(QmlSettings* settings READ qmlSettings CONSTANT)
+    Q_PROPERTY(StreamCapture* capture READ streamCapture CONSTANT)
     Q_PROPERTY(StreamSession* session READ qmlSession NOTIFY sessionChanged)
     Q_PROPERTY(QList<QmlController*> controllers READ qmlControllers NOTIFY controllersChanged)
     Q_PROPERTY(bool discoveryEnabled READ discoveryEnabled WRITE setDiscoveryEnabled NOTIFY discoveryEnabledChanged)
@@ -116,6 +118,7 @@ public:
 
     QmlMainWindow *qmlWindow() const;
     QmlSettings *qmlSettings() const;
+    StreamCapture *streamCapture() const { return stream_capture; }
     StreamSession *qmlSession() const;
     QList<QmlController*> qmlControllers() const;
 
@@ -285,6 +288,7 @@ private:
 
     Settings *settings = {};
     QmlSettings *settings_qml = {};
+    StreamCapture *stream_capture = {};
     QmlMainWindow *window = {};
     StreamSession *session = {};
     QThread *frame_thread = {};

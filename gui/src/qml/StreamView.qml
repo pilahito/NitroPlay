@@ -279,6 +279,30 @@ Item {
         }
     }
 
+    // what is being recorded or sent live, always visible while it happens
+    Rectangle {
+        anchors {
+            left: parent.left
+            top: parent.top
+            margins: 24
+        }
+        visible: Chiaki.capture.recording || Chiaki.capture.live
+        z: 10
+        radius: 14
+        color: "#cc0b0d12"
+        width: captureLabel.implicitWidth + 28
+        height: captureLabel.implicitHeight + 14
+
+        Label {
+            id: captureLabel
+            anchors.centerIn: parent
+            font.bold: true
+            font.pixelSize: 18
+            color: Chiaki.capture.live ? "#b48cff" : "#ff5c5c"
+            text: (Chiaki.capture.live ? qsTr("◉ EN DIRECTO") : "") + (Chiaki.capture.live && Chiaki.capture.recording ? "   " : "") + (Chiaki.capture.recording ? qsTr("● GRABANDO") : "")
+        }
+    }
+
     RoundButton {
         anchors {
             right: parent.right
@@ -725,7 +749,7 @@ Item {
                     if(Chiaki.window.videoPreset == ChiakiWindow.VideoPreset.Custom)
                         placeboSettingsButton;
                     else
-                        displaySettingsButton;
+                        recordButton;
                 }
                 Keys.onReturnPressed: {
                     menuController.close();
@@ -742,11 +766,39 @@ Item {
                 checkable: false
                 onClicked: root.openPlaceboSettings()
                 KeyNavigation.left: displaySettingsButton
+                KeyNavigation.right: recordButton
                 visible: Chiaki.window.videoPreset == ChiakiWindow.VideoPreset.Custom
                 Keys.onReturnPressed: {
                     menuController.close();
                     clicked();
                 }
+                Keys.onEscapePressed: menuController.close()
+            }
+
+            ToolSeparator {}
+
+            ToolButton {
+                id: recordButton
+                text: Chiaki.capture.recording ? qsTr("■ Parar grabación") : qsTr("● Grabar")
+                padding: 10
+                checkable: false
+                palette.buttonText: Chiaki.capture.recording ? "#ff5c5c" : undefined
+                onClicked: Chiaki.capture.toggleRecording()
+                KeyNavigation.left: Chiaki.window.videoPreset == ChiakiWindow.VideoPreset.Custom ? placeboSettingsButton : displaySettingsButton
+                KeyNavigation.right: liveButton
+                Keys.onReturnPressed: clicked()
+                Keys.onEscapePressed: menuController.close()
+            }
+
+            ToolButton {
+                id: liveButton
+                text: Chiaki.capture.live ? qsTr("■ Terminar directo") : qsTr("◉ En directo")
+                padding: 10
+                checkable: false
+                palette.buttonText: Chiaki.capture.live ? "#b48cff" : undefined
+                onClicked: Chiaki.capture.toggleLive()
+                KeyNavigation.left: recordButton
+                Keys.onReturnPressed: clicked()
                 Keys.onEscapePressed: menuController.close()
             }
             }

@@ -322,7 +322,7 @@ Window {
                 icon.source: "qrc:/icons/settings-20px.svg"
                 onClicked: streamMenuWindow.displaySettingsRequested()
                 KeyNavigation.left: customButton
-                KeyNavigation.right: Chiaki.window.videoPreset == ChiakiWindow.VideoPreset.Custom ? placeboSettingsButton : displaySettingsButton
+                KeyNavigation.right: Chiaki.window.videoPreset == ChiakiWindow.VideoPreset.Custom ? placeboSettingsButton : recordButton
                 Keys.onReturnPressed: clicked()
                 Keys.onEscapePressed: streamMenuWindow.closeRequested()
             }
@@ -336,6 +336,34 @@ Window {
                 visible: Chiaki.window.videoPreset == ChiakiWindow.VideoPreset.Custom
                 onClicked: streamMenuWindow.placeboSettingsRequested()
                 KeyNavigation.left: displaySettingsButton
+                KeyNavigation.right: recordButton
+                Keys.onReturnPressed: clicked()
+                Keys.onEscapePressed: streamMenuWindow.closeRequested()
+            }
+
+            ToolSeparator {}
+
+            ToolButton {
+                id: recordButton
+                text: Chiaki.capture.recording ? qsTr("■ Parar grabación") : qsTr("● Grabar")
+                padding: 10
+                checkable: false
+                palette.buttonText: Chiaki.capture.recording ? "#ff5c5c" : undefined
+                onClicked: Chiaki.capture.toggleRecording()
+                KeyNavigation.left: Chiaki.window.videoPreset == ChiakiWindow.VideoPreset.Custom ? placeboSettingsButton : displaySettingsButton
+                KeyNavigation.right: liveButton
+                Keys.onReturnPressed: clicked()
+                Keys.onEscapePressed: streamMenuWindow.closeRequested()
+            }
+
+            ToolButton {
+                id: liveButton
+                text: Chiaki.capture.live ? qsTr("■ Terminar directo") : qsTr("◉ En directo")
+                padding: 10
+                checkable: false
+                palette.buttonText: Chiaki.capture.live ? "#b48cff" : undefined
+                onClicked: Chiaki.capture.toggleLive()
+                KeyNavigation.left: recordButton
                 Keys.onReturnPressed: clicked()
                 Keys.onEscapePressed: streamMenuWindow.closeRequested()
             }
@@ -362,6 +390,19 @@ Window {
                 font.bold: true
                 font.pixelSize: 28
             }
+        }
+
+        Label {
+            anchors {
+                left: parent.left
+                top: parent.top
+                leftMargin: 30
+                topMargin: 12
+            }
+            visible: text.length > 0
+            text: Chiaki.capture.status
+            color: Chiaki.capture.live ? "#b48cff" : Chiaki.capture.recording ? "#ff5c5c" : "#c9d6ea"
+            font.pixelSize: 16
         }
 
         Label {
