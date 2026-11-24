@@ -5,6 +5,7 @@
 #include "qmlmainwindow.h"
 #include "qmlcontroller.h"
 #include "streamcapture.h"
+#include "gameart.h"
 #include "qmlsettings.h"
 
 #include <QObject>
@@ -82,6 +83,7 @@ class QmlBackend : public QObject
     Q_PROPERTY(QmlMainWindow* window READ qmlWindow CONSTANT)
     Q_PROPERTY(QmlSettings* settings READ qmlSettings CONSTANT)
     Q_PROPERTY(StreamCapture* capture READ streamCapture CONSTANT)
+    Q_PROPERTY(GameArt* gameArt READ gameArt CONSTANT)
     Q_PROPERTY(StreamSession* session READ qmlSession NOTIFY sessionChanged)
     Q_PROPERTY(QList<QmlController*> controllers READ qmlControllers NOTIFY controllersChanged)
     Q_PROPERTY(bool discoveryEnabled READ discoveryEnabled WRITE setDiscoveryEnabled NOTIFY discoveryEnabledChanged)
@@ -119,6 +121,7 @@ public:
     QmlMainWindow *qmlWindow() const;
     QmlSettings *qmlSettings() const;
     StreamCapture *streamCapture() const { return stream_capture; }
+    GameArt *gameArt() const { return game_art; }
     StreamSession *qmlSession() const;
     QList<QmlController*> qmlControllers() const;
 
@@ -289,6 +292,7 @@ private:
     Settings *settings = {};
     QmlSettings *settings_qml = {};
     StreamCapture *stream_capture = {};
+    GameArt *game_art = {};
     QmlMainWindow *window = {};
     StreamSession *session = {};
     QThread *frame_thread = {};

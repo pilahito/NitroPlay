@@ -557,6 +557,45 @@ DialogView {
                         }
 
                         Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("Imagen del tema:")
+                        }
+
+                        RowLayout {
+                            readonly property bool hasImage: Chiaki.settings.themeImagesRevision >= 0 && Chiaki.settings.themeImage(root.currentThemeKey) !== ""
+                            C.Button {
+                                text: parent.hasImage ? qsTr("Cambiar imagen…") : qsTr("Elegir imagen…")
+                                onClicked: themeImageDialog.open()
+                            }
+                            C.Button {
+                                text: qsTr("Quitar")
+                                visible: parent.hasImage
+                                onClicked: Chiaki.settings.clearThemeImage(root.currentThemeKey)
+                            }
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("(personajes o fondo del juego, solo para este tema)")
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: qsTr("Tema del juego:")
+                        }
+
+                        C.CheckBox {
+                            text: qsTr("Usar la portada y los colores del juego abierto en la PS5")
+                            checked: Chiaki.gameArt.enabled
+                            onToggled: Chiaki.gameArt.enabled = checked
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
+                            text: Chiaki.gameArt.gameName ? qsTr("(ahora: %1)").arg(Chiaki.gameArt.gameName) : qsTr("(Marcado)")
+                        }
+
+                        Label {
                             Layout.columnSpan: 3
                             Layout.alignment: Qt.AlignLeft
                             Layout.topMargin: 22
@@ -3514,6 +3553,13 @@ DialogView {
             property string role: "accent"
             title: qsTr("Choose a color")
             onAccepted: root.setCustomColor(themeColorDialog.role, themeColorDialog.selectedColor)
+        }
+        FileDialog {
+            id: themeImageDialog
+            title: qsTr("Imagen para el tema")
+            nameFilters: [qsTr("Imágenes (*.png *.jpg *.jpeg *.webp *.gif *.bmp)")]
+            currentFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
+            onAccepted: Chiaki.settings.setThemeImage(root.currentThemeKey, selectedFile)
         }
     }
 }

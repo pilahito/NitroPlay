@@ -311,6 +311,7 @@ Item {
                     themeKey: root.currentThemeKey
                     themePalette: root.currentTheme
                     showLabel: false
+                    showPoster: false
                 }
             }
         }

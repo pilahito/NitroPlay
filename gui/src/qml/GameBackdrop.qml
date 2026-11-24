@@ -1,4 +1,7 @@
 import QtQuick
+import QtQuick.Effects
+
+import org.streetpea.chiaking
 
 // Original vector motifs inspired by the selected game, drawn only in
 // the console browser. No animation or decoration covers the video stream.
@@ -7,6 +10,21 @@ Rectangle {
     required property string themeKey
     required property var themePalette
     property bool showLabel: true
+    // portada nítida del juego abierto a un lado (solo en pantallas grandes)
+    property bool showPoster: true
+    // con un juego abierto en la PS5, el fondo toma su portada y su color
+    readonly property bool gameArt: Chiaki.gameArt.active
+    readonly property color accentColor: gameArt ? Chiaki.gameArt.accent : themePalette.accent
+    // imagen propia que el usuario eligió para este tema
+    readonly property string userImage: Chiaki.settings.themeImagesRevision >= 0 ? Chiaki.settings.themeImage(themeKey) : ""
+    // los temas de juegos traen la portada de su juego (se descarga la primera vez)
+    readonly property bool isGameTheme: ["ps5", "ps4", "ps3", "ps2", "ps1", "custom", "chiaki"].indexOf(themeKey) < 0
+    readonly property string themeCover: isGameTheme && userImage === "" && Chiaki.gameArt.coversRevision >= 0
+                                         ? Chiaki.gameArt.coverFor(themePalette.name) : ""
+    readonly property string coverSource: gameArt ? Chiaki.gameArt.coverUrl : themeCover
+    readonly property bool hasCover: coverSource !== ""
+    // fondo oficial de playstation.com: grande, se ve nítido y sin póster
+    readonly property bool officialArt: coverSource.indexOf("-oficial.") >= 0
     color: themePalette.background
 
     Rectangle {
@@ -17,6 +35,50 @@ Rectangle {
             GradientStop { position: 1; color: backdrop.themePalette.background }
         }
         opacity: 0.4
+    }
+
+    // imagen que el usuario ha elegido para este tema (Ajustes → Apariencia)
+    Image {
+        id: themeImage
+        anchors.fill: parent
+        readonly property string url: backdrop.userImage
+        source: url ? url + "?r=" + Chiaki.settings.themeImagesRevision : ""
+        visible: url !== "" && status === Image.Ready && !backdrop.gameArt
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        cache: false
+        sourceSize.width: 2560
+        opacity: 0.75
+    }
+
+    // portada del juego, ampliada y difuminada como fondo
+    Image {
+        id: gameCover
+        anchors.fill: parent
+        source: backdrop.coverSource
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        visible: false
+    }
+    MultiEffect {
+        anchors.fill: parent
+        source: gameCover
+        visible: backdrop.hasCover && gameCover.status === Image.Ready
+        blurEnabled: !backdrop.officialArt
+        blur: 1.0
+        blurMax: 48
+        saturation: backdrop.officialArt ? 0 : 0.15
+        opacity: backdrop.officialArt ? 1 : 0.85
+    }
+
+    // oscurece la imagen para que los textos y botones se sigan leyendo
+    Rectangle {
+        anchors.fill: parent
+        visible: themeImage.visible || backdrop.hasCover
+        gradient: Gradient {
+            GradientStop { position: 0; color: Qt.alpha(backdrop.themePalette.background, 0.35) }
+            GradientStop { position: 1; color: Qt.alpha(backdrop.themePalette.background, 0.75) }
+        }
     }
 
     Canvas {
@@ -30,13 +92,14 @@ Rectangle {
             target: backdrop
             function onThemeKeyChanged() { art.requestPaint(); }
             function onThemePaletteChanged() { art.requestPaint(); }
+            function onAccentColorChanged() { art.requestPaint(); }
         }
         onPaint: {
             const ctx = getContext("2d");
             ctx.reset();
             ctx.scale(width / 1000, height / 700);
-            ctx.strokeStyle = backdrop.themePalette.accent;
-            ctx.fillStyle = backdrop.themePalette.accent;
+            ctx.strokeStyle = backdrop.accentColor;
+            ctx.fillStyle = backdrop.accentColor;
             ctx.lineWidth = 2;
             function line(points) {
                 ctx.beginPath(); ctx.moveTo(points[0][0], points[0][1]);
@@ -343,6 +406,40 @@ Rectangle {
             }
         }
     }
+    // la portada nítida del juego, con su nombre
+    Column {
+        anchors {
+            right: parent.right
+            verticalCenter: parent.verticalCenter
+            rightMargin: Math.round(parent.width * 0.05)
+        }
+        spacing: 12
+        visible: backdrop.hasCover && !backdrop.officialArt && backdrop.showPoster && backdrop.width > 1000 && poster.status === Image.Ready
+        Image {
+            id: poster
+            source: backdrop.coverSource
+            height: Math.round(backdrop.height * 0.55)
+            fillMode: Image.PreserveAspectFit
+            asynchronous: true
+            smooth: true
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowBlur: 0.8
+                shadowOpacity: 0.7
+            }
+        }
+        Text {
+            width: poster.paintedWidth
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
+            text: backdrop.gameArt ? Chiaki.gameArt.gameName : backdrop.themePalette.name
+            color: backdrop.accentColor
+            font.pixelSize: 18
+            font.bold: true
+        }
+    }
+
     Text {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -350,7 +447,7 @@ Rectangle {
         text: backdrop.themePalette.name
         font.pixelSize: 18
         font.letterSpacing: 2
-        color: backdrop.themePalette.accent
+        color: backdrop.accentColor
         opacity: 0.6
         visible: backdrop.showLabel && backdrop.themeKey !== "chiaki"
     }

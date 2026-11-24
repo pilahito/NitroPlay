@@ -1,6 +1,14 @@
 #include "qmlsettings.h"
 #include "sessionlog.h"
 
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QImageReader>
+#include <QRegularExpression>
+#include <QSettings>
+#include <QUrl>
+
 #include <QSet>
 #include <QKeySequence>
 #include <QFutureWatcher>
@@ -558,6 +566,57 @@ void QmlSettings::toggleAudioMute()
 void QmlSettings::changeAudioVolume(int delta)
 {
     setAudioVolume(qBound(0, audioVolume() + delta, 128));
+}
+
+static bool validThemeKey(const QString &key)
+{
+    static const QRegularExpression re("^[a-z0-9]{1,32}$");
+    return re.match(key).hasMatch();
+}
+
+QString QmlSettings::themeImagesDir() const
+{
+    return QDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)).filePath("temas");
+}
+
+QString QmlSettings::themeImage(const QString &theme_key) const
+{
+    if (!validThemeKey(theme_key))
+        return {};
+    const QString path = QSettings().value("theme_images/" + theme_key).toString();
+    if (path.isEmpty() || !QFileInfo::exists(path))
+        return {};
+    return QUrl::fromLocalFile(path).toString();
+}
+
+bool QmlSettings::setThemeImage(const QString &theme_key, const QUrl &file)
+{
+    const QString source = file.toLocalFile();
+    if (!validThemeKey(theme_key) || source.isEmpty() || !QImageReader(source).canRead())
+        return false;
+    QDir().mkpath(themeImagesDir());
+    const QString suffix = QFileInfo(source).suffix().toLower();
+    const QString target = QDir(themeImagesDir()).filePath(theme_key + "." + (suffix.isEmpty() ? "png" : suffix));
+    clearThemeImage(theme_key);
+    if (!QFile::copy(source, target))
+        return false;
+    QSettings().setValue("theme_images/" + theme_key, target);
+    theme_images_revision++;
+    emit themeImagesChanged();
+    return true;
+}
+
+void QmlSettings::clearThemeImage(const QString &theme_key)
+{
+    if (!validThemeKey(theme_key))
+        return;
+    QSettings settings_store;
+    const QString old = settings_store.value("theme_images/" + theme_key).toString();
+    if (!old.isEmpty() && QFileInfo(old).absolutePath() == QDir(themeImagesDir()).absolutePath())
+        QFile::remove(old);
+    settings_store.remove("theme_images/" + theme_key);
+    theme_images_revision++;
+    emit themeImagesChanged();
 }
 
 QString QmlSettings::audioInDevice() const

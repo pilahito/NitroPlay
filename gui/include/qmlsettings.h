@@ -50,6 +50,8 @@ class QmlSettings : public QObject
     Q_PROPERTY(int codecRemotePS5 READ codecRemotePS5 WRITE setCodecRemotePS5 NOTIFY codecRemotePS5Changed)
     Q_PROPERTY(int audioBufferSize READ audioBufferSize WRITE setAudioBufferSize NOTIFY audioBufferSizeChanged)
     Q_PROPERTY(int audioVolume READ audioVolume WRITE setAudioVolume NOTIFY audioVolumeChanged)
+    // sube cada vez que cambia la imagen de algún tema, para que QML la vuelva a cargar
+    Q_PROPERTY(int themeImagesRevision READ themeImagesRevision NOTIFY themeImagesChanged)
     Q_PROPERTY(QString audioInDevice READ audioInDevice WRITE setAudioInDevice NOTIFY audioInDeviceChanged)
     Q_PROPERTY(QString audioOutDevice READ audioOutDevice WRITE setAudioOutDevice NOTIFY audioOutDeviceChanged)
     Q_PROPERTY(QString decoder READ decoder WRITE setDecoder NOTIFY decoderChanged)
@@ -288,6 +290,11 @@ public:
     // silenciar / volver a poner el volumen que había, y subir o bajar a saltos
     Q_INVOKABLE void toggleAudioMute();
     Q_INVOKABLE void changeAudioVolume(int delta);
+    // imagen propia de cada tema (una copia en la carpeta de datos de la app)
+    int themeImagesRevision() const { return theme_images_revision; }
+    Q_INVOKABLE QString themeImage(const QString &theme_key) const;
+    Q_INVOKABLE bool setThemeImage(const QString &theme_key, const QUrl &file);
+    Q_INVOKABLE void clearThemeImage(const QString &theme_key);
 
     QString audioInDevice() const;
     void setAudioInDevice(const QString &device);
@@ -666,6 +673,7 @@ signals:
     void displayTargetTrcChanged();
     void audioBufferSizeChanged();
     void audioVolumeChanged();
+    void themeImagesChanged();
     void audioOutDeviceChanged();
     void audioInDeviceChanged();
     void wifiDroppedNotifChanged();
@@ -777,6 +785,8 @@ signals:
 private:
     Settings *settings = {};
     int volume_before_mute = 128;
+    int theme_images_revision = 0;
+    QString themeImagesDir() const;
     QStringList audio_in_devices;
     QStringList audio_out_devices;
 };

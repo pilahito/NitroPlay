@@ -57,6 +57,8 @@ set(SOURCE_FILES
 	src/systemdinhibit.cpp
 	include/streamcapture.h
 	src/streamcapture.cpp
+	include/gameart.h
+	src/gameart.cpp
 	)
 set(RESOURCE_FILES "")
 

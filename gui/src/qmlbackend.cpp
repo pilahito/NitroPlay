@@ -287,6 +287,7 @@ QmlBackend::QmlBackend(Settings *settings, QmlMainWindow *window)
     , settings(settings)
     , settings_qml(new QmlSettings(settings, this))
     , stream_capture(new StreamCapture(this))
+    , game_art(new GameArt(this))
     , window(window)
 {
     qt_msg_handler = qInstallMessageHandler(msg_handler);
@@ -334,6 +335,18 @@ QmlBackend::QmlBackend(Settings *settings, QmlMainWindow *window)
     connect(settings, &Settings::ManualHostsUpdated, this, &QmlBackend::hostsChanged);
     connect(settings, &Settings::CurrentProfileChanged, this, &QmlBackend::profileChanged);
     connect(&discovery_manager, &DiscoveryManager::HostsUpdated, this, &QmlBackend::updateDiscoveryHosts);
+    // the game open on a registered console gives the interface its look
+    connect(&discovery_manager, &DiscoveryManager::HostsUpdated, this, [this]() {
+        for (const auto &host : discovery_manager.GetHosts()) {
+            if (!host.running_app_name.isEmpty() && this->settings->GetRegisteredHostRegistered(host.GetHostMAC())) {
+                game_art->setRunningGame(host.running_app_name, host.running_app_titleid);
+                return;
+            }
+        }
+        // keep the last game while streaming: discovery can miss a reply mid-game
+        if (!session)
+            game_art->setRunningGame(QString(), QString());
+    });
     discovery_manager.SetSettings(settings);
     setDiscoveryEnabled(true);
     connect(ControllerManager::GetInstance(), &ControllerManager::AvailableControllersUpdated, this, &QmlBackend::updateControllers);
