@@ -907,7 +907,8 @@ Item {
                 checked: Chiaki.window.themeFrame
                 onToggled: Chiaki.window.themeFrame = checked
                 KeyNavigation.left: liveButton
-                Keys.onReturnPressed: toggle()
+                // toggle() no emite «toggled»: se cambia el ajuste directamente
+                Keys.onReturnPressed: Chiaki.window.themeFrame = !Chiaki.window.themeFrame
                 Keys.onEscapePressed: menuController.close()
             }
             }
