@@ -1,0 +1,90 @@
+name: NitroPlay Android (APK)
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publicar un release de NitroPlay con el APK"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    name: NitroPlay para Android y Meta Quest
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dependencias de Python
+        run: python -m pip install protobuf grpcio-tools
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Instalar SDK, NDK y CMake
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;28.2.13676358" "cmake;3.22.1"
+
+      - name: Configurar firma del APK
+        env:
+          KS_B64: ${{ secrets.NITROPLAY_KEYSTORE_BASE64 }}
+          KS_PW: ${{ secrets.NITROPLAY_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.NITROPLAY_KEY_ALIAS }}
+        run: |
+          KS="$RUNNER_TEMP/nitroplay.jks"
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$KS"
+            PW="$KS_PW"; ALIAS="$KS_ALIAS"
+          else
+            PW="nitroplay-ci"; ALIAS="nitroplay"
+            keytool -genkeypair -keystore "$KS" -storepass "$PW" -keypass "$PW" -alias "$ALIAS" -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=NitroPlay"
+            echo "::warning::Sin secretos de firma: se uso una clave temporal. Las actualizaciones no se podran instalar encima de versiones anteriores."
+          fi
+          {
+            echo "chiakiKeystore=$KS"
+            echo "chiakiKeystorePW=$PW"
+            echo "chiakiKeyAlias=$ALIAS"
+            echo "chiakiKeyPW=$PW"
+          } > android/local.properties
+
+      - name: Compilar el APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease
+
+      - name: Preparar el APK
+        run: |
+          APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          test -n "$APK"
+          mkdir -p dist
+          cp "$APK" "dist/NitroPlay-android-${GITHUB_RUN_NUMBER}.apk"
+          ls -lh dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NitroPlay-android
+          path: dist/*.apk
+
+      - name: Publicar release
+        if: ${{ inputs.publish }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-v${{ github.run_number }}
+          name: NitroPlay Android ${{ github.run_number }}
+          prerelease: true
+          files: dist/*.apk
+          body: "APK de NitroPlay para Android y Meta Quest 2, Pro, 3 y 3S. Sin probar todavia en dispositivo."
