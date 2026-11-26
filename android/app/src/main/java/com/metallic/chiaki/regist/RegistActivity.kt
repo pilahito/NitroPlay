@@ -3,6 +3,14 @@
 package com.metallic.chiaki.regist
 
 import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import android.os.Bundle
 import android.util.Base64
 import android.view.View
@@ -50,6 +58,7 @@ class RegistActivity: AppCompatActivity(), RevealActivity
 		binding.broadcastCheckBox.isChecked = intent.getBooleanExtra(EXTRA_BROADCAST, true)
 
 		binding.registButton.setOnClickListener { doRegist() }
+		binding.psnLoginButton.setOnClickListener { startPsnLogin() }
 
 		binding.ps4VersionRadioGroup.check(when(viewModel.ps4Version.value ?: RegistViewModel.ConsoleVersion.PS5) {
 			RegistViewModel.ConsoleVersion.PS5 -> R.id.ps5RadioButton
@@ -79,6 +88,34 @@ class RegistActivity: AppCompatActivity(), RevealActivity
 			binding.pinHelpBeforeTextView.setText(if(it.isPS5) R.string.regist_pin_instructions_ps5_before else R.string.regist_pin_instructions_ps4_before)
 			binding.pinHelpNavigationTextView.setText(if(it.isPS5) R.string.regist_pin_instructions_ps5_navigation else R.string.regist_pin_instructions_ps4_navigation)
 		})
+	}
+
+	private fun startPsnLogin()
+	{
+		startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PsnAccountIdFetcher.LOGIN_URL)))
+		val input = TextInputEditText(this).apply { hint = getString(R.string.regist_psn_login_hint) }
+		MaterialAlertDialogBuilder(this)
+			.setTitle(R.string.regist_psn_login_title)
+			.setMessage(R.string.regist_psn_login_message)
+			.setView(input)
+			.setPositiveButton(R.string.regist_psn_login_continue) { _, _ -> fetchPsnAccountId(input.text.toString()) }
+			.setNegativeButton(android.R.string.cancel, null)
+			.show()
+	}
+
+	private fun fetchPsnAccountId(pasted: String)
+	{
+		val code = PsnAccountIdFetcher.codeFromPastedUrl(pasted)
+		if(code == null)
+		{
+			Toast.makeText(this, R.string.regist_psn_login_no_code, Toast.LENGTH_LONG).show()
+			return
+		}
+		lifecycleScope.launch {
+			val result = withContext(Dispatchers.IO) { runCatching { PsnAccountIdFetcher.fetchAccountId(code) } }
+			result.onSuccess { binding.psnIdEditText.setText(it) }
+				.onFailure { Toast.makeText(this@RegistActivity, R.string.regist_psn_login_failed, Toast.LENGTH_LONG).show() }
+		}
 	}
 
 	private fun doRegist()
