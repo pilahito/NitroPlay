@@ -33,10 +33,12 @@ jobs:
       - name: Dependencias de Python
         run: python -m pip install protobuf grpcio-tools
 
-      - uses: android-actions/setup-android@v3
-
       - name: Instalar SDK, NDK y CMake
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;28.2.13676358" "cmake;3.22.1"
+        run: |
+          SDKM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -n 1)
+          echo "sdkmanager: $SDKM"
+          yes | "$SDKM" --licenses > /dev/null || true
+          "$SDKM" "platforms;android-35" "build-tools;35.0.0" "ndk;28.2.13676358" "cmake;3.22.1"
 
       - name: Configurar firma del APK
         env:
