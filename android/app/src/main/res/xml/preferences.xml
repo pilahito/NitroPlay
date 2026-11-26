@@ -13,6 +13,12 @@
             app:fragment="com.metallic.chiaki.settings.SettingsRegisteredHostsFragment"
             app:icon="@drawable/ic_console_simple"/>
 
+        <Preference
+            app:key="background_image"
+            app:title="@string/preferences_background_image_title"
+            app:summary="@string/preferences_background_image_summary"
+            app:icon="@drawable/ic_console_simple"/>
+
         <SwitchPreference
             app:key="@string/preferences_swap_cross_moon_key"
             app:title="@string/preferences_swap_cross_moon_title"

@@ -4,6 +4,8 @@ package com.metallic.chiaki.main
 
 import android.app.ActivityOptions
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -13,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import java.io.File
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.metallic.chiaki.R
 import com.metallic.chiaki.common.*
@@ -23,6 +26,7 @@ import com.metallic.chiaki.lib.ConnectInfo
 import com.metallic.chiaki.lib.DiscoveryHost
 import com.metallic.chiaki.manualconsole.EditManualConsoleActivity
 import com.metallic.chiaki.regist.RegistActivity
+import com.metallic.chiaki.settings.BACKGROUND_FILE_NAME
 import com.metallic.chiaki.settings.SettingsActivity
 import com.metallic.chiaki.stream.StreamActivity
 
@@ -120,6 +124,24 @@ class MainActivity : AppCompatActivity()
 				isEnabled = false
 				onBackPressedDispatcher.onBackPressed()
 			}
+		}
+	}
+
+	override fun onResume()
+	{
+		super.onResume()
+		loadBackground()
+	}
+
+	// fondo elegido en Ajustes; se reduce a la mitad para no gastar memoria en el casco
+	private fun loadBackground()
+	{
+		val file = File(filesDir, BACKGROUND_FILE_NAME)
+		if(!file.exists())
+			return
+		val options = BitmapFactory.Options().apply { inSampleSize = 2 }
+		BitmapFactory.decodeFile(file.path, options)?.let {
+			binding.rootLayout.background = BitmapDrawable(resources, it)
 		}
 	}
 

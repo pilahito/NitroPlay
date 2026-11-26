@@ -122,4 +122,8 @@
     <string name="preferences_fps_key">stream_fps</string>
     <string name="preferences_bitrate_key">stream_bitrate</string>
     <string name="preferences_codec_key">stream_codec</string>
+    <string name="preferences_background_image_title">Imagen de fondo</string>
+    <string name="preferences_background_image_summary">Elige una imagen de tu dispositivo para el menú de consolas</string>
+    <string name="background_image_saved">Imagen de fondo guardada</string>
+    <string name="background_image_error">No se pudo guardar la imagen</string>
 </resources>

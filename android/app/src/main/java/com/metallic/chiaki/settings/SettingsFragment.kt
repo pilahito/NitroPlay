@@ -5,7 +5,9 @@ package com.metallic.chiaki.settings
 import android.app.Activity
 import android.content.Intent
 import android.content.res.Resources
+import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import android.text.InputType
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -17,6 +19,7 @@ import com.metallic.chiaki.common.exportAndShareAllSettings
 import com.metallic.chiaki.common.ext.viewModelFactory
 import com.metallic.chiaki.common.getDatabase
 import com.metallic.chiaki.common.importSettingsFromUri
+import java.io.File
 
 class DataStore(val preferences: Preferences): PreferenceDataStore()
 {
@@ -80,6 +83,8 @@ class SettingsFragment: PreferenceFragmentCompat(), TitleFragment
 	companion object
 	{
 		private const val PICK_SETTINGS_JSON_REQUEST = 1
+		private const val PICK_BACKGROUND_IMAGE_REQUEST = 2
+		private const val BACKGROUND_PREF_KEY = "background_image"
 	}
 
 	override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?)
@@ -131,6 +136,7 @@ class SettingsFragment: PreferenceFragmentCompat(), TitleFragment
 
 		preferenceScreen.findPreference<Preference>(getString(R.string.preferences_export_settings_key))?.setOnPreferenceClickListener { exportSettings(); true }
 		preferenceScreen.findPreference<Preference>(getString(R.string.preferences_import_settings_key))?.setOnPreferenceClickListener { importSettings(); true }
+		preferenceScreen.findPreference<Preference>(BACKGROUND_PREF_KEY)?.setOnPreferenceClickListener { pickBackgroundImage(); true }
 	}
 
 	override fun getTitle(resources: Resources): String = resources.getString(R.string.title_settings)
@@ -150,14 +156,44 @@ class SettingsFragment: PreferenceFragmentCompat(), TitleFragment
 		startActivityForResult(intent, PICK_SETTINGS_JSON_REQUEST)
 	}
 
+	private fun pickBackgroundImage()
+	{
+		val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+			addCategory(Intent.CATEGORY_OPENABLE)
+			type = "image/*"
+		}
+		startActivityForResult(intent, PICK_BACKGROUND_IMAGE_REQUEST)
+	}
+
+	private fun saveBackgroundImage(uri: Uri)
+	{
+		val context = context ?: return
+		val saved = try {
+			context.contentResolver.openInputStream(uri)?.use { input ->
+				File(context.filesDir, BACKGROUND_FILE_NAME).outputStream().use { input.copyTo(it) }
+			} != null
+		} catch(e: Exception) {
+			false
+		}
+		Toast.makeText(context, if(saved) R.string.background_image_saved else R.string.background_image_error, Toast.LENGTH_SHORT).show()
+	}
+
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
 	{
-		if(requestCode == PICK_SETTINGS_JSON_REQUEST && resultCode == Activity.RESULT_OK)
+		if(resultCode != Activity.RESULT_OK)
+			return
+		when(requestCode)
 		{
-			val activity = activity ?: return
-			data?.data?.also {
-				importSettingsFromUri(activity, it, lifecycleScope)
+			PICK_SETTINGS_JSON_REQUEST -> {
+				val activity = activity ?: return
+				data?.data?.also {
+					importSettingsFromUri(activity, it, lifecycleScope)
+				}
 			}
+			PICK_BACKGROUND_IMAGE_REQUEST -> data?.data?.also { saveBackgroundImage(it) }
 		}
 	}
 }
+
+// fichero donde se guarda la imagen de fondo elegida en Ajustes (en el almacenamiento privado de la app)
+const val BACKGROUND_FILE_NAME = "console_background.img"
