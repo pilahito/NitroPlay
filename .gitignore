@@ -39,3 +39,10 @@ chiaki.conf
 .cache/
 *.vscode
 site/
+
+# Assets del usuario: nunca van al repositorio
+marcos/
+marcos_nuevos/
+frames/
+wallpapers/
+fondos/

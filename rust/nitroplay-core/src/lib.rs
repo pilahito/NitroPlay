@@ -13,3 +13,4 @@ pub mod rpcrypt;
 #[allow(clippy::all)]
 mod rpcrypt_tables;
 pub mod session;
+pub mod theme_pack;

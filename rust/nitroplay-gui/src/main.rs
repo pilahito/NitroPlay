@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use tao::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoopBuilder},
-    window::{Icon, WindowBuilder},
+    window::{Fullscreen, Icon, WindowBuilder},
 };
 use wry::WebViewBuilder;
 
@@ -24,6 +24,60 @@ enum UiEvent {
     Code(String),
     Done(Result<String, String>),
     Reg(Result<String, String>),
+    Fs,
+    Packs(String),
+    PackImg(String),
+}
+
+/// Marcos incluidos (dibujados por NitroPlay, sin arte de terceros). Los packs del usuario llevan prefijo `u-`.
+const BUILTIN_FRAMES: [&str; 9] = ["none", "fire", "neon", "ps", "crt", "swords", "crates", "mech", "heist"];
+
+fn valid_frame(id: &str) -> bool {
+    BUILTIN_FRAMES.contains(&id) || id.strip_prefix("u-").map(nitroplay_core::theme_pack::valid_pack_id).unwrap_or(false)
+}
+
+/// PNG de un pack (max 6 MB, firma PNG comprobada) como cadena `"id","data:image/png;base64,..."` para JS.
+fn pack_image_args(frame_id: &str) -> Option<String> {
+    let id = frame_id.strip_prefix("u-")?;
+    if !nitroplay_core::theme_pack::valid_pack_id(id) {
+        return None;
+    }
+    let png = std::fs::read(frames_dir()?.join(id).join("frame.png")).ok()?;
+    if png.len() > 6_000_000 || !png.starts_with(&[0x89, b'P', b'N', b'G']) {
+        return None;
+    }
+    Some(format!("\"{frame_id}\",\"data:image/png;base64,{}\"", nitroplay_core::regist_payload::base64_encode(&png)))
+}
+
+/// Carpeta de marcos del usuario: %APPDATA%\NitroPlay\marcos\<pack>\{frame.png, theme.json}
+fn frames_dir() -> Option<PathBuf> {
+    let dir = PathBuf::from(std::env::var_os("APPDATA")?).join("NitroPlay").join("marcos");
+    std::fs::create_dir_all(&dir).ok()?;
+    Some(dir)
+}
+
+/// Lee los packs del usuario y devuelve un array JSON con sus datos (sin imagen; se pide aparte con `pack:<id>`). Max 60 packs.
+fn scan_packs() -> String {
+    let mut items: Vec<String> = Vec::new();
+    let Some(dir) = frames_dir() else { return "[]".into() };
+    let mut entries: Vec<_> = std::fs::read_dir(dir).map(|r| r.flatten().collect()).unwrap_or_default();
+    entries.sort_by_key(|e| e.file_name());
+    for e in entries {
+        let id = e.file_name().to_string_lossy().to_string();
+        if !nitroplay_core::theme_pack::valid_pack_id(&id) || !e.path().is_dir() || items.len() >= 60 {
+            continue;
+        }
+        if !e.path().join("frame.png").is_file() {
+            continue;
+        }
+        let json = std::fs::read_to_string(e.path().join("theme.json")).unwrap_or_default();
+        let m = nitroplay_core::theme_pack::parse_theme_json(&json, &id);
+        items.push(format!(
+            "{{\"id\":\"u-{id}\",\"n\":\"{}\",\"s\":\"{}\",\"vx\":{},\"vy\":{},\"vw\":{},\"vh\":{}}}",
+            m.name, m.system, m.viewport.x, m.viewport.y, m.viewport.w, m.viewport.h
+        ));
+    }
+    format!("[{}]", items.join(","))
 }
 
 // ---- configuracion en %APPDATA%\NitroPlay\config.txt (lineas clave=valor) ----
@@ -127,7 +181,12 @@ fn render(tab: &str, error: Option<&str>) -> String {
     let error = error.map(js_safe).unwrap_or_else(|| "_".into());
     let bg = get_key(&format!("bg-{theme}")).filter(|d| valid_bg(d)).unwrap_or_else(|| "_".into());
     let quality = get_key("quality").filter(|q| valid_quality(q)).unwrap_or_else(|| "{}".into());
-    UI.replace("__QUALITY__", &quality)
+    let frame = get_key("frame").filter(|f| valid_frame(f)).unwrap_or_else(|| "none".into());
+    let frame_on = get_key("frame-on").map(|v| v != "0").unwrap_or(true);
+    let frame_th = get_key("frame-th").and_then(|v| v.parse::<u32>().ok()).filter(|n| *n <= 40).unwrap_or(14);
+    let frame_json = format!("{{\"id\":\"{frame}\",\"on\":{frame_on},\"th\":{frame_th}}}");
+    UI.replace("__FRAME__", &frame_json)
+        .replace("__QUALITY__", &quality)
         .replace("__THEME__", &theme)
         .replace("__ACCOUNT__", &account)
         .replace("__TAB__", tab)
@@ -329,6 +388,38 @@ fn main() {
                         });
                     }
                 }
+            } else if msg == "fs" {
+                let _ = ipc_proxy.send_event(UiEvent::Fs);
+            } else if msg == "packs" {
+                let p = ipc_proxy.clone();
+                std::thread::spawn(move || {
+                    let _ = p.send_event(UiEvent::Packs(scan_packs()));
+                });
+            } else if let Some(id) = msg.strip_prefix("pack:") {
+                if valid_frame(id) {
+                    let (p, id) = (ipc_proxy.clone(), id.to_string());
+                    std::thread::spawn(move || {
+                        if let Some(args) = pack_image_args(&id) {
+                            let _ = p.send_event(UiEvent::PackImg(args));
+                        }
+                    });
+                }
+            } else if msg == "open:marcos" {
+                if let Some(dir) = frames_dir() {
+                    let _ = std::process::Command::new("explorer").arg(dir).spawn();
+                }
+            } else if let Some(id) = msg.strip_prefix("frame:") {
+                if valid_frame(id) {
+                    set_key("frame", id);
+                }
+            } else if let Some(v) = msg.strip_prefix("frame-on:") {
+                set_key("frame-on", if v == "0" { "0" } else { "1" });
+            } else if let Some(v) = msg.strip_prefix("frame-th:") {
+                if let Ok(n) = v.parse::<u32>() {
+                    if n <= 40 {
+                        set_key("frame-th", &n.to_string());
+                    }
+                }
             } else if msg == "open:fondos" {
                 if let Some(dir) = wallpapers_dir() {
                     let _ = std::process::Command::new("explorer").arg(dir).spawn();
@@ -361,6 +452,17 @@ fn main() {
         match event {
             Event::UserEvent(UiEvent::Consoles(j)) => {
                 let _ = webview.evaluate_script(&format!("showConsoles({j})"));
+            }
+            Event::UserEvent(UiEvent::Fs) => {
+                let on = window.fullscreen().is_some();
+                window.set_fullscreen(if on { None } else { Some(Fullscreen::Borderless(None)) });
+                let _ = webview.evaluate_script(&format!("fsState({})", !on));
+            }
+            Event::UserEvent(UiEvent::PackImg(args)) => {
+                let _ = webview.evaluate_script(&format!("packImg({args})"));
+            }
+            Event::UserEvent(UiEvent::Packs(j)) => {
+                let _ = webview.evaluate_script(&format!("showPacks({j})"));
             }
             Event::UserEvent(UiEvent::Reg(r)) => {
                 let (ok, txt) = match r { Ok(n) => (true, format!("Consola vinculada: {n}")), Err(e) => (false, e) };
@@ -395,4 +497,40 @@ fn main() {
             _ => (),
         }
     });
+}
+
+#[cfg(test)]
+mod pack_scan_tests {
+    use super::*;
+
+    #[test]
+    fn escanea_packs_validos_y_salta_los_rotos() {
+        let base = std::env::temp_dir().join(format!("np-appdata-{}", std::process::id()));
+        let marcos = base.join("NitroPlay").join("marcos");
+        let _ = std::fs::remove_dir_all(&base);
+        std::fs::create_dir_all(marcos.join("god-of-war")).unwrap();
+        std::fs::write(marcos.join("god-of-war").join("frame.png"), b"\x89PNG").unwrap();
+        std::fs::write(
+            marcos.join("god-of-war").join("theme.json"),
+            r#"{"name":"God of War \"x\"","system":"ps5","viewport_rect":{"x":16.5,"y":15.0,"w":66.9,"h":69.5}}"#,
+        ).unwrap();
+        // sin frame.png: debe saltarse
+        std::fs::create_dir_all(marcos.join("roto")).unwrap();
+        // id no valido: debe saltarse
+        std::fs::create_dir_all(marcos.join("mal id!")).unwrap();
+        std::fs::write(marcos.join("mal id!").join("frame.png"), b"\x89PNG").unwrap();
+
+        std::env::set_var("APPDATA", &base);
+        let json = scan_packs();
+        let _ = std::fs::remove_dir_all(&base);
+
+        assert!(json.starts_with('[') && json.ends_with(']'), "{json}");
+        assert_eq!(json.matches("\"id\"").count(), 1, "{json}");
+        assert!(json.contains("\"id\":\"u-god-of-war\""), "{json}");
+        assert!(json.contains("\"s\":\"ps5\""), "{json}");
+        assert!(json.contains("\"vx\":16.5"), "{json}");
+        assert!(json.contains("\"vh\":69.5"), "{json}");
+        // el nombre llega sin comillas que rompan el JSON
+        assert!(!json.contains("\\\"x"), "{json}");
+    }
 }
