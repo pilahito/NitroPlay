@@ -179,8 +179,11 @@ jobs:
           cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\libssl-*-x64.dll" chiaki-ng-Win
           cp "${{ github.workspace }}\${{ env.dep_folder }}\bin\SDL2.dll" chiaki-ng-Win
           cp "${{ github.workspace }}\${{ env.dep_folder }}\bin\SDL3.dll" chiaki-ng-Win
-          cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\hidapi.dll" chiaki-ng-Win
-          cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\fftw3.dll" chiaki-ng-Win
+          # hidapi y fftw3 solo existen en la version nativa de Steam Deck: se copian solo si estan instaladas
+          foreach ($opt in @("hidapi.dll", "fftw3.dll")) {
+            $src = Join-Path "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin" $opt
+            if (Test-Path $src) { cp $src chiaki-ng-Win }
+          }
           cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\opus.dll" chiaki-ng-Win
           cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\libspeexdsp.dll" chiaki-ng-Win
           cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\lcms2.dll" chiaki-ng-Win
