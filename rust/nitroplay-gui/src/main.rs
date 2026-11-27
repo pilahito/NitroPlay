@@ -174,6 +174,19 @@ fn parse_response(data: &[u8], ip: String) -> Option<Console> {
     Some(Console { name, ip: clean(&ip), kind, state })
 }
 
+/// Broadcast de la subred (asume /24) de la interfaz que usa la ruta a Internet. No envia nada.
+fn subnet_broadcast() -> Option<String> {
+    let s = std::net::UdpSocket::bind("0.0.0.0:0").ok()?;
+    s.connect("8.8.8.8:80").ok()?;
+    match s.local_addr().ok()?.ip() {
+        std::net::IpAddr::V4(ip) => {
+            let o = ip.octets();
+            Some(format!("{}.{}.{}.255", o[0], o[1], o[2]))
+        }
+        _ => None,
+    }
+}
+
 fn scan_consoles() -> Vec<Console> {
     use std::net::UdpSocket;
     use std::time::{Duration, Instant};
@@ -192,6 +205,9 @@ fn scan_consoles() -> Vec<Console> {
             for (port, ver) in [(987u16, "00020020"), (9302u16, "00030010")] {
                 let pkt = format!("SRCH * HTTP/1.1\ndevice-discovery-protocol-version:{ver}\n");
                 let _ = socket.send_to(pkt.as_bytes(), ("255.255.255.255", port));
+                if let Some(b) = subnet_broadcast() {
+                    let _ = socket.send_to(pkt.as_bytes(), (b.as_str(), port));
+                }
             }
             last_send = Some(Instant::now());
         }
