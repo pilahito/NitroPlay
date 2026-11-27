@@ -50,6 +50,22 @@ pub fn parse_user_id(json: &str) -> Option<u64> {
     digits.parse().ok()
 }
 
+/// Direccion de login de Sony (la misma que usa la app de Android y el cliente de escritorio).
+pub fn login_url() -> String {
+    format!(
+        "https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/authorize?service_entity=urn:service-entity:psn&response_type=code&client_id={}&redirect_uri={}&scope={}&request_locale=en_US&ui=pr&service_logo=ps&layout_type=popup&smcid=remoteplay&prompt=always&PlatformPrivacyWs1=minimal&",
+        CLIENT_ID, REDIRECT_URI, SCOPE
+    )
+}
+
+/// Extrae "access_token" de la respuesta JSON del token (`{"access_token":"abc",...}`).
+pub fn parse_access_token(json: &str) -> Option<String> {
+    let key = "\"access_token\"";
+    let rest = &json[json.find(key)? + key.len()..];
+    let rest = rest.trim_start().strip_prefix(':')?.trim_start().strip_prefix('"')?;
+    let token: String = rest.chars().take_while(|c| *c != '"').collect();
+    if token.is_empty() { None } else { Some(token) }
+}
 const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /// Base64 estándar con relleno '=' (sin dependencias).
@@ -140,3 +156,22 @@ mod edge_tests {
     }
 }
 
+
+#[cfg(test)]
+mod login_tests {
+    use super::*;
+
+    #[test]
+    fn login_url_has_client_and_redirect() {
+        let u = login_url();
+        assert!(u.starts_with("https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/authorize?"));
+        assert!(u.contains(CLIENT_ID) && u.contains(REDIRECT_URI));
+    }
+
+    #[test]
+    fn access_token_is_parsed() {
+        assert_eq!(parse_access_token(r#"{"access_token":"abc123","x":1}"#).as_deref(), Some("abc123"));
+        assert_eq!(parse_access_token(r#"{"access_token":""}"#), None);
+        assert_eq!(parse_access_token("{}"), None);
+    }
+}
