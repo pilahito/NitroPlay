@@ -89,3 +89,6 @@
     <init>(...);
     <fields>;
 }
+
+# JNI hacia Rust (rust/psn-jni): no renombrar ni quitar
+-keep class com.metallic.chiaki.regist.PsnNative { *; }
