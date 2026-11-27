@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use tao::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoopBuilder},
-    window::WindowBuilder,
+    window::{Icon, WindowBuilder},
 };
 use wry::WebViewBuilder;
 
@@ -20,6 +20,7 @@ const UI: &str = include_str!("ui.html");
 enum UiEvent {
     Login,
     Bg(String),
+    Consoles(String),
     Code(String),
     Done(Result<String, String>),
 }
@@ -108,12 +109,123 @@ fn fetch_account_id(code: &str) -> Result<String, String> {
     Ok(account_id_base64(user_id))
 }
 
+/// Icono propio de NitroPlay: cuadrado redondeado azul con un triangulo de "play".
+fn make_icon() -> Option<Icon> {
+    let n = 64usize;
+    let r = 14.0f32;
+    let mut px = vec![0u8; n * n * 4];
+    for y in 0..n {
+        for x in 0..n {
+            let (fx, fy) = (x as f32 + 0.5, y as f32 + 0.5);
+            let cx = fx.clamp(r, n as f32 - r);
+            let cy = fy.clamp(r, n as f32 - r);
+            if ((fx - cx).powi(2) + (fy - cy).powi(2)).sqrt() > r {
+                continue;
+            }
+            let t = (fx + fy) / (2.0 * n as f32);
+            let lerp = |a: f32, b: f32| (a + (b - a) * t) as u8;
+            let mut c = [lerp(20.0, 61.0), lerp(34.0, 123.0), lerp(74.0, 255.0), 255u8];
+            let in_play = fx > 24.0 && fy > 18.0 + (fx - 24.0) * (14.0 / 24.0) && fy < 46.0 - (fx - 24.0) * (14.0 / 24.0);
+            if in_play {
+                c = [255, 255, 255, 255];
+            }
+            let i = (y * n + x) * 4;
+            px[i..i + 4].copy_from_slice(&c);
+        }
+    }
+    Icon::from_rgba(px, n as u32, n as u32).ok()
+}
+
+// ---- deteccion de consolas en la red (protocolo SRCH de chiaki: UDP a 987 PS4 / 9302 PS5) ----
+struct Console {
+    name: String,
+    ip: String,
+    kind: String,
+    state: &'static str,
+}
+
+fn clean(s: &str) -> String {
+    s.chars().filter(|c| c.is_ascii_alphanumeric() || " .-_()".contains(*c)).take(40).collect()
+}
+
+fn parse_response(data: &[u8], ip: String) -> Option<Console> {
+    let text = String::from_utf8_lossy(data);
+    let mut lines = text.lines();
+    let first = lines.next()?;
+    let mut parts = first.split_whitespace();
+    if parts.next()? != "HTTP/1.1" {
+        return None;
+    }
+    let state = match parts.next()? {
+        "200" => "Encendida",
+        "620" => "En reposo",
+        _ => "Estado desconocido",
+    };
+    let (mut name, mut kind) = (String::new(), String::new());
+    for line in lines {
+        if let Some((k, v)) = line.split_once(':') {
+            match k.trim() {
+                "host-name" => name = clean(v.trim()),
+                "host-type" => kind = clean(v.trim()),
+                _ => {}
+            }
+        }
+    }
+    Some(Console { name, ip: clean(&ip), kind, state })
+}
+
+fn scan_consoles() -> Vec<Console> {
+    use std::net::UdpSocket;
+    use std::time::{Duration, Instant};
+    let socket = (9303u16..=9319)
+        .find_map(|p| UdpSocket::bind(("0.0.0.0", p)).ok())
+        .or_else(|| UdpSocket::bind(("0.0.0.0", 0)).ok());
+    let Some(socket) = socket else { return vec![] };
+    let _ = socket.set_broadcast(true);
+    let _ = socket.set_read_timeout(Some(Duration::from_millis(250)));
+    let deadline = Instant::now() + Duration::from_secs(4);
+    let mut last_send: Option<Instant> = None;
+    let mut found: Vec<Console> = Vec::new();
+    let mut buf = [0u8; 2048];
+    while Instant::now() < deadline {
+        if last_send.map_or(true, |t| t.elapsed() >= Duration::from_secs(1)) {
+            for (port, ver) in [(987u16, "00020020"), (9302u16, "00030010")] {
+                let pkt = format!("SRCH * HTTP/1.1\ndevice-discovery-protocol-version:{ver}\n");
+                let _ = socket.send_to(pkt.as_bytes(), ("255.255.255.255", port));
+            }
+            last_send = Some(Instant::now());
+        }
+        if let Ok((n, addr)) = socket.recv_from(&mut buf) {
+            if let Some(c) = parse_response(&buf[..n], addr.ip().to_string()) {
+                if !found.iter().any(|f| f.ip == c.ip) {
+                    found.push(c);
+                }
+            }
+        }
+    }
+    found
+}
+
+fn consoles_json(list: &[Console]) -> String {
+    let items: Vec<String> = list
+        .iter()
+        .map(|c| {
+            format!(
+                "{{\"n\":\"{}\",\"ip\":\"{}\",\"t\":\"{}\",\"s\":\"{}\"}}",
+                c.name, c.ip, c.kind, c.state
+            )
+        })
+        .collect();
+    format!("[{}]", items.join(","))
+}
+
 fn main() {
     let event_loop = EventLoopBuilder::<UiEvent>::with_user_event().build();
     let proxy = event_loop.create_proxy();
     let window = WindowBuilder::new()
         .with_title("NitroPlay")
         .with_maximized(true)
+        .with_window_icon(make_icon())
         .build(&event_loop)
         .unwrap();
 
@@ -134,6 +246,11 @@ fn main() {
             let msg: &str = req.body();
             if msg == "login" {
                 let _ = ipc_proxy.send_event(UiEvent::Login);
+            } else if msg == "scan" {
+                let p = ipc_proxy.clone();
+                std::thread::spawn(move || {
+                    let _ = p.send_event(UiEvent::Consoles(consoles_json(&scan_consoles())));
+                });
             } else if msg == "open:wallpapers" {
                 let _ = std::process::Command::new("rundll32")
                     .args(["url.dll,FileProtocolHandler", "https://www.playstation.com/es-es/wallpapers/"])
@@ -160,6 +277,9 @@ fn main() {
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
         match event {
+            Event::UserEvent(UiEvent::Consoles(j)) => {
+                let _ = webview.evaluate_script(&format!("showConsoles({j})"));
+            }
             Event::UserEvent(UiEvent::Bg(d)) => {
                 let _ = webview.evaluate_script(&format!("applyBg(\"{d}\")"));
             }

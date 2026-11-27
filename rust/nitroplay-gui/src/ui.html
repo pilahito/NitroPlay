@@ -43,7 +43,8 @@ code,.id{font-family:Consolas,monospace}.id{font-size:26px;letter-spacing:2px;ba
 <div class="card"><b>Para vincular tu PS4/PS5</b><ol>
 <li>En la PS5: Ajustes → Sistema → Remote Play → Vincular dispositivo. Anota el PIN de 8 dígitos (caduca en minutos).</li>
 <li>Ten a mano tu Account-ID (pestaña Cuenta PSN).</li>
-<li>El registro y la transmisión los hace el cliente NitroPlay de transmisión (Android/escritorio), no esta ventana.</li></ol></div></section>
+<li>El registro y la transmisión los hace el cliente NitroPlay de transmisión (Android/escritorio), no esta ventana.</li></ol></div>
+<div class="card"><b>Consolas en tu red</b><p id="scanTxt">Pulsa buscar con la consola encendida y en la misma red.</p><button class="p" onclick="scan()">Buscar consolas</button><div id="cl"></div></div></section>
 
 <section id="temas"><h1>Temas</h1><p>Elige un estilo; se guarda para el próximo inicio. <span class="badge" id="cnt"></span></p><div class="card"><b>Fondo propio</b><p>Pon la imagen de cada juego como fondo del tema que tengas elegido: se guarda para ese tema y vuelve sola al elegirlo. Usa imágenes que hayas descargado tú para uso personal.</p>
 <input type="file" id="bgFile" accept="image/*" style="display:none" onchange="setBg(this.files[0])">
@@ -71,6 +72,8 @@ function applyTheme(id){var t=T.filter(function(x){return x[0]==id})[0]||T[T.len
 function pick(id){applyTheme(id);send("theme:"+id)}
 function go(t){STATE.tab=t;var s=document.querySelectorAll("section");for(var i=0;i<s.length;i++)s[i].className=(s[i].id==t?"on":"");var b=document.querySelectorAll("nav button");for(var j=0;j<b.length;j++)b[j].className=(b[j].getAttribute("data-t")==t?"on":"")}
 function login(){send("login")}
+function scan(){$("scanTxt").textContent="Buscando consolas (unos 4 segundos)...";send("scan")}
+function showConsoles(a){var t=$("scanTxt"),l=$("cl"),h="";if(!a.length){t.textContent="No encontré consolas. Comprueba que está encendida (o en reposo) y en la misma red.";l.innerHTML="";return}t.textContent="Encontradas: "+a.length+". Para vincular, abre NitroPlay en Android, toca la consola y escribe el PIN de 8 dígitos.";for(var i=0;i<a.length;i++){h+="<div class=\"card\"><b>"+(a[i].n||"Consola")+"</b><span class=\"badge\">"+a[i].t+"</span><span class=\"badge\">"+a[i].s+"</span><p>Dirección: <code>"+a[i].ip+"</code></p></div>"}l.innerHTML=h}
 function applyBg(d){var b=document.body.style;if(d){b.backgroundImage="linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url("+d+")";b.backgroundSize="cover";b.backgroundPosition="center"}else{b.backgroundImage="";b.backgroundSize=""}}
 function setBg(f){if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,1920/im.width),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);var d=c.toDataURL("image/jpeg",0.85);applyBg(d);send("bg:"+d)};im.src=r.result};r.readAsDataURL(f)}
 function clearBg(){applyBg("");send("bg-clear")}
