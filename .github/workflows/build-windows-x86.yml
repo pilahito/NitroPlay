@@ -115,6 +115,22 @@ jobs:
           Copy-Item "$sdk\Bin\shaderc_shared.dll" "${{ env.dep_folder }}\bin" -Force
           Copy-Item "$sdk\Lib\shaderc_shared.lib" "${{ env.dep_folder }}\lib" -Force
           Copy-Item "$sdk\Include\shaderc" "${{ env.dep_folder }}\include" -Recurse -Force
+          # libplacebo busca shaderc por pkg-config; el Vulkan SDK no trae .pc, así que se crea uno
+          $pc = "${{ github.workspace }}\${{ env.dep_folder }}\lib\pkgconfig"
+          New-Item -ItemType Directory -Force -Path $pc | Out-Null
+          $prefix = "${{ github.workspace }}\${{ env.dep_folder }}" -replace '\\','/'
+          @(
+            "prefix=$prefix",
+            "libdir=`${prefix}/lib",
+            "includedir=`${prefix}/include",
+            "",
+            "Name: shaderc",
+            "Description: shaderc (Vulkan SDK)",
+            "Version: 1.4.0",
+            "Libs: -L`${libdir} -lshaderc_shared",
+            "Cflags: -I`${includedir}"
+          ) | Set-Content -Path "$pc\shaderc.pc" -Encoding ascii
+          Get-Content "$pc\shaderc.pc"
 
       - name: Make build directory
         run: |
