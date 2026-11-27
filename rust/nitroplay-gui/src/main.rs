@@ -109,31 +109,9 @@ fn fetch_account_id(code: &str) -> Result<String, String> {
     Ok(account_id_base64(user_id))
 }
 
-/// Icono propio de NitroPlay: cuadrado redondeado azul con un triangulo de "play".
+/// Icono oficial de NitroPlay (gui/nitroplay.ico, 256x256), en RGBA crudo.
 fn make_icon() -> Option<Icon> {
-    let n = 64usize;
-    let r = 14.0f32;
-    let mut px = vec![0u8; n * n * 4];
-    for y in 0..n {
-        for x in 0..n {
-            let (fx, fy) = (x as f32 + 0.5, y as f32 + 0.5);
-            let cx = fx.clamp(r, n as f32 - r);
-            let cy = fy.clamp(r, n as f32 - r);
-            if ((fx - cx).powi(2) + (fy - cy).powi(2)).sqrt() > r {
-                continue;
-            }
-            let t = (fx + fy) / (2.0 * n as f32);
-            let lerp = |a: f32, b: f32| (a + (b - a) * t) as u8;
-            let mut c = [lerp(20.0, 61.0), lerp(34.0, 123.0), lerp(74.0, 255.0), 255u8];
-            let in_play = fx > 24.0 && fy > 18.0 + (fx - 24.0) * (14.0 / 24.0) && fy < 46.0 - (fx - 24.0) * (14.0 / 24.0);
-            if in_play {
-                c = [255, 255, 255, 255];
-            }
-            let i = (y * n + x) * 4;
-            px[i..i + 4].copy_from_slice(&c);
-        }
-    }
-    Icon::from_rgba(px, n as u32, n as u32).ok()
+    Icon::from_rgba(include_bytes!("icon-256.rgba").to_vec(), 256, 256).ok()
 }
 
 // ---- deteccion de consolas en la red (protocolo SRCH de chiaki: UDP a 987 PS4 / 9302 PS5) ----
