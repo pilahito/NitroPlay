@@ -18,8 +18,12 @@ button.p{background:var(--c2);color:#fff;border:0;border-radius:9px;padding:11px
 button.p:hover{filter:brightness(1.15)}
 code,.id{font-family:Consolas,monospace}.id{font-size:26px;letter-spacing:2px;background:rgba(0,0,0,.4);padding:10px 14px;border-radius:9px;display:inline-block;margin:8px 0;user-select:all}
 .err{background:#5b1a1a;border:1px solid #b44;padding:10px 14px;border-radius:9px;max-width:640px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:10px}
-.t{border-radius:12px;padding:46px 10px 10px;cursor:pointer;border:2px solid transparent;font-size:13px;font-weight:600;text-shadow:0 1px 3px #000;min-height:92px;display:flex;flex-direction:column;justify-content:flex-end}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-top:14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chip{background:rgba(255,255,255,.1);color:#fff;border:0;border-radius:99px;padding:7px 16px;cursor:pointer;font-size:13px}.chip.on{background:var(--c2)}
+.pv{height:96px;border-radius:9px 9px 0 0;position:relative;overflow:hidden}.pv i{position:absolute;left:0;top:0;bottom:0;width:26%;background:rgba(0,0,0,.45)}.pv b{position:absolute;left:32%;top:14px;width:46%;height:9px;border-radius:5px;background:rgba(255,255,255,.85)}.pv u{position:absolute;left:32%;top:34px;width:30%;height:22px;border-radius:6px;background:var(--pc)}
+.tn{padding:9px 12px;background:rgba(0,0,0,.55);border-radius:0 0 9px 9px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center}.tn small{font-weight:400;opacity:.7}
+.tick{display:none;background:#fff;color:#000;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:700}.t.on .tick{display:inline-block}
+.t{border-radius:12px;cursor:pointer;border:3px solid transparent;transition:transform .12s}
 .t small{font-weight:400;opacity:.8}.t.on{border-color:#fff}.t:hover{transform:translateY(-2px)}
 .badge{display:inline-block;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.12);font-size:12px;margin-left:8px}
 </style></head><body>
@@ -44,6 +48,7 @@ code,.id{font-family:Consolas,monospace}.id{font-size:26px;letter-spacing:2px;ba
 <li>En la PS5: Ajustes → Sistema → Remote Play → Vincular dispositivo. Anota el PIN de 8 dígitos (caduca en minutos).</li>
 <li>Ten a mano tu Account-ID (pestaña Cuenta PSN).</li>
 <li>El registro y la transmisión los hace el cliente NitroPlay de transmisión (Android/escritorio), no esta ventana.</li></ol></div>
+<div class="card"><b>Código PIN de la PS5</b><p>Escribe aquí el PIN de 8 dígitos que te muestra la consola (Ajustes → Sistema → Uso a distancia → Vincular dispositivo).</p><input id="pin" inputmode="numeric" maxlength="8" placeholder="00000000" oninput="this.value=this.value.replace(/\D/g,'')" style="font:26px Consolas,monospace;letter-spacing:6px;width:230px;padding:8px 12px;border-radius:9px;border:1px solid #fff4;background:#0006;color:#fff"> <button class="p" onclick="pinGo()">Vincular</button><p id="pinTxt"></p></div>
 <div class="card"><b>Consolas en tu red</b><p id="scanTxt">Pulsa buscar con la consola encendida y en la misma red.</p><button class="p" onclick="scan()">Buscar consolas</button><div id="cl"></div></div></section>
 
 <section id="temas"><h1>Temas</h1><p>Elige un estilo; se guarda para el próximo inicio. <span class="badge" id="cnt"></span></p><div class="card"><b>Fondo propio</b><p>Pon la imagen de cada juego como fondo del tema que tengas elegido: se guarda para ese tema y vuelve sola al elegirlo. Usa imágenes que hayas descargado tú para uso personal.</p>
@@ -51,7 +56,7 @@ code,.id{font-family:Consolas,monospace}.id{font-size:26px;letter-spacing:2px;ba
 <button class="p" onclick="document.getElementById('bgFile').click()">Elegir imagen</button>
 <button class="p" onclick="clearBg()">Quitar fondo de este tema</button>
 <button class="p" onclick="send('open:wallpapers')">Ver fondos oficiales de PlayStation</button></div>
-<div id="grid"></div></section>
+<div class="chips" id="chips"></div><div id="grid"></div></section>
 
 <section id="calidad"><h1>HDR y alta calidad</h1>
 <div class="card"><b>Cómo activarlo en el cliente de transmisión</b><ul>
@@ -72,6 +77,7 @@ function applyTheme(id){var t=T.filter(function(x){return x[0]==id})[0]||T[T.len
 function pick(id){applyTheme(id);send("theme:"+id)}
 function go(t){STATE.tab=t;var s=document.querySelectorAll("section");for(var i=0;i<s.length;i++)s[i].className=(s[i].id==t?"on":"");var b=document.querySelectorAll("nav button");for(var j=0;j<b.length;j++)b[j].className=(b[j].getAttribute("data-t")==t?"on":"")}
 function login(){send("login")}
+function pinGo(){var v=$("pin").value,t=$("pinTxt");if(v.length!=8){t.textContent="El PIN tiene 8 dígitos.";return}t.textContent="PIN correcto de formato. Esta app todavía no puede completar el registro (no está implementado en Rust): escríbelo ahora en NitroPlay Android → Vincular consola. No se guarda en ningún sitio.";$("pin").value=""}
 function scan(){$("scanTxt").textContent="Buscando consolas (unos 4 segundos)...";send("scan")}
 function showConsoles(a){var t=$("scanTxt"),l=$("cl"),h="";if(!a.length){t.textContent="No encontré consolas. Comprueba que está encendida (o en reposo) y en la misma red.";l.innerHTML="";return}t.textContent="Encontradas: "+a.length+". Para vincular, abre NitroPlay en Android, toca la consola y escribe el PIN de 8 dígitos.";for(var i=0;i<a.length;i++){h+="<div class=\"card\"><b>"+(a[i].n||"Consola")+"</b><span class=\"badge\">"+a[i].t+"</span><span class=\"badge\">"+a[i].s+"</span><p>Dirección: <code>"+a[i].ip+"</code></p></div>"}l.innerHTML=h}
 function applyBg(d){var b=document.body.style;if(d){b.backgroundImage="linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url("+d+")";b.backgroundSize="cover";b.backgroundPosition="center"}else{b.backgroundImage="";b.backgroundSize=""}}
@@ -79,9 +85,12 @@ function setBg(f){if(!f)return;var r=new FileReader();r.onload=function(){var im
 function clearBg(){applyBg("");send("bg-clear")}
 function copyId(){var r=document.createRange();r.selectNode($("idVal"));var s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand("copy");$("cp").textContent="Copiado"}
 (function(){
-var g=$("grid"),h="";g.className="grid";
-for(var i=0;i<T.length;i++){var t=T[i];h+='<div class="t" data-id="'+t[0]+'" onclick="pick(\''+t[0]+'\')" style="background:radial-gradient(circle at 25% 25%,'+t[4]+'aa,transparent 60%),radial-gradient(circle at 80% 80%,'+t[5]+'88,transparent 55%),linear-gradient(160deg,'+t[3]+',#000)">'+t[1]+'<small>'+t[2]+'</small></div>'}
-g.innerHTML=h;$("cnt").textContent=T.length+" estilos";
+var g=$("grid");g.className="grid";
+var grp=["Todos"];for(var q=0;q<T.length;q++){if(grp.indexOf(T[q][2])<0)grp.push(T[q][2])}
+window.filt=function(n){var a=document.querySelectorAll(".t");for(var i=0;i<a.length;i++)a[i].style.display=(n=="Todos"||a[i].getAttribute("data-g")==n)?"":"none";var c=document.querySelectorAll(".chip");for(var j=0;j<c.length;j++)c[j].className="chip"+(c[j].getAttribute("data-g")==n?" on":"")};
+var ch="";for(var w=0;w<grp.length;w++){ch+='<button class="chip" data-g="'+grp[w]+'" onclick="filt(this.getAttribute(\'data-g\'))">'+grp[w]+'</button>'}$("chips").innerHTML=ch;
+var h="";for(var i=0;i<T.length;i++){var t=T[i];h+='<div class="t" data-id="'+t[0]+'" data-g="'+t[2]+'" onclick="pick(\''+t[0]+'\')"><div class="pv" style="--pc:'+t[4]+';background:radial-gradient(circle at 25% 25%,'+t[4]+'aa,transparent 60%),radial-gradient(circle at 80% 80%,'+t[5]+'88,transparent 55%),linear-gradient(160deg,'+t[3]+',#000)"><i></i><b></b><u></u></div><div class="tn"><span>'+t[1]+'<br><small>'+t[2]+'</small></span><span class="tick">Aplicado</span></div></div>'}
+g.innerHTML=h;filt("Todos");$("cnt").textContent=T.length+" estilos";
 var bs=document.querySelectorAll("nav button");for(var k=0;k<bs.length;k++){bs[k].onclick=(function(n){return function(){go(n.getAttribute("data-t"))}})(bs[k])}
 var has=STATE.account&&STATE.account.charAt(0)!="_";
 if(has){$("idVal").textContent=STATE.account;$("idBox").style.display="block";$("loginBtn").textContent="Iniciar sesión de nuevo";$("estado").textContent="conectada";$("estadoTxt").textContent="Tu Account-ID está guardado en este equipo."}
