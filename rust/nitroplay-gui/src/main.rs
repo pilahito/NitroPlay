@@ -1,4 +1,4 @@
-﻿//! NitroPlay (Windows): login de PSN dentro de la ventana. Al llegar la redireccion de Sony
+//! NitroPlay (Windows): login de PSN dentro de la ventana. Al llegar la redireccion de Sony
 //! se corta la navegacion, se saca el `code` y se muestra el Account-ID. Todo en Rust.
 #![windows_subsystem = "windows"]
 
@@ -47,7 +47,7 @@ fn escape(s: &str) -> String {
     s.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;")
 }
 
-const STYLE: &str = "body{font-family:Segoe UI,sans-serif;background:#0f1424;color:#e8ecf8;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}.box{max-width:560px;text-align:center;padding:24px}h1{color:#6ea8ff}input{font-size:26px;text-align:center;width:100%;padding:12px;border-radius:8px;border:1px solid #3a4770;background:#1a2138;color:#fff}button{margin-top:14px;padding:10px 22px;font-size:16px;border:0;border-radius:8px;background:#3d7bff;color:#fff;cursor:pointer}small{color:#93a0c8}";
+const STYLE: &str = "body{font-family:Segoe UI,sans-serif;background:#0f1424;color:#e8ecf8;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}.box{max-width:560px;text-align:center;padding:24px}h1{color:#6ea8ff}input{font-family:Consolas,monospace;letter-spacing:2px;font-size:26px;text-align:center;width:100%;padding:12px;border-radius:8px;border:1px solid #3a4770;background:#1a2138;color:#fff}button{margin-top:14px;padding:10px 22px;font-size:16px;border:0;border-radius:8px;background:#3d7bff;color:#fff;cursor:pointer}small{color:#93a0c8}";
 
 fn page_wait() -> String {
     format!("<html><head><meta charset='utf-8'><style>{STYLE}</style></head><body><div class='box'><h1>NitroPlay</h1><p>Sesion iniciada. Obteniendo tu Account-ID...</p></div></body></html>")

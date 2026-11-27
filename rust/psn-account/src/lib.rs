@@ -53,7 +53,7 @@ pub fn parse_user_id(json: &str) -> Option<u64> {
 /// Direccion de login de Sony (la misma que usa la app de Android y el cliente de escritorio).
 pub fn login_url() -> String {
     format!(
-        "https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/authorize?service_entity=urn:service-entity:psn&response_type=code&client_id={}&redirect_uri={}&scope={}&request_locale=en_US&ui=pr&service_logo=ps&layout_type=popup&smcid=remoteplay&prompt=always&PlatformPrivacyWs1=minimal&",
+        "https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/authorize?service_entity=urn:service-entity:psn&response_type=code&client_id={}&redirect_uri={}&scope={}&request_locale=es_ES&ui=pr&service_logo=ps&layout_type=popup&smcid=remoteplay&prompt=always&PlatformPrivacyWs1=minimal&",
         CLIENT_ID, REDIRECT_URI, SCOPE
     )
 }
