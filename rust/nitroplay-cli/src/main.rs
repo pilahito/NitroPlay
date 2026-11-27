@@ -1,4 +1,4 @@
-﻿//! nitroplay-psn: abre el login de PSN, saca el `code` de la URL final y calcula el Account-ID.
+//! nitroplay-psn: abre el login de PSN, saca el `code` de la URL final y calcula el Account-ID.
 use psn_account::{
     account_id_base64, basic_auth_header, code_from_redirect_url, login_url, parse_access_token,
     parse_user_id, token_body, TOKEN_URL,
@@ -52,7 +52,8 @@ fn main() {
     println!("NitroPlay - login de PSN");
     println!("1) Se abre el navegador. Inicia sesion tu mismo en Sony.");
     println!("2) Al terminar, la pagina final no cargara: copia la URL completa de la barra de direcciones.\n");
-    if !open_browser(&url) {
+    let sin_navegador = std::env::args().any(|a| a == "--sin-navegador");
+    if !sin_navegador && !open_browser(&url) {
         println!("No pude abrir el navegador. Abre esta direccion a mano:\n{url}\n");
     }
     let pasted = ask("Pega aqui la URL final (o solo el code): ");

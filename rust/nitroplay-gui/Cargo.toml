@@ -1,0 +1,15 @@
+[package]
+name = "nitroplay-gui"
+version = "0.1.0"
+edition = "2021"
+description = "NitroPlay para Windows: ventana con login de PSN integrado, todo en Rust"
+
+[[bin]]
+name = "nitroplay"
+path = "src/main.rs"
+
+[dependencies]
+psn-account = { path = "../psn-account" }
+ureq = "3"
+wry = "0.57"
+tao = "0.37"
