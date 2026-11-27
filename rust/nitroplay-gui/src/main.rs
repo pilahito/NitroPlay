@@ -1,4 +1,4 @@
-﻿//! NitroPlay (Windows): interfaz con temas, cuenta PSN integrada y guia de HDR/calidad.
+//! NitroPlay (Windows): interfaz con temas, cuenta PSN integrada y guia de HDR/calidad.
 //! El login de Sony va dentro de la ventana: se corta la redireccion, se saca el `code`
 //! y se calcula el Account-ID. Todo en Rust (wry + tao).
 #![windows_subsystem = "windows"]
@@ -57,6 +57,13 @@ fn valid_theme(id: &str) -> bool {
     !id.is_empty() && id.len() <= 20 && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
 }
 
+/// Fondo propio: solo una imagen en data URL (data:image/...;base64,...) y de tamano razonable.
+fn valid_bg(d: &str) -> bool {
+    d.starts_with("data:image/")
+        && d.len() <= 8_000_000
+        && d.chars().all(|c| c.is_ascii_alphanumeric() || "+/=:;,-".contains(c))
+}
+
 fn js_safe(s: &str) -> String {
     s.chars()
         .filter(|c| c.is_ascii_alphanumeric() || " .,:;_-+/=()".contains(*c))
@@ -67,10 +74,12 @@ fn render(tab: &str, error: Option<&str>) -> String {
     let theme = get_key("theme").filter(|t| valid_theme(t)).unwrap_or_else(|| "nitroplay".into());
     let account = get_key("account").map(|a| js_safe(&a)).unwrap_or_else(|| "_".into());
     let error = error.map(js_safe).unwrap_or_else(|| "_".into());
+    let bg = get_key("bg").filter(|d| valid_bg(d)).unwrap_or_else(|| "_".into());
     UI.replace("__THEME__", &theme)
         .replace("__ACCOUNT__", &account)
         .replace("__TAB__", tab)
         .replace("__ERROR__", &error)
+        .replace("__BG__", &bg)
 }
 
 fn fetch_account_id(code: &str) -> Result<String, String> {
@@ -123,6 +132,16 @@ fn main() {
             let msg: &str = req.body();
             if msg == "login" {
                 let _ = ipc_proxy.send_event(UiEvent::Login);
+            } else if msg == "open:wallpapers" {
+                let _ = std::process::Command::new("rundll32")
+                    .args(["url.dll,FileProtocolHandler", "https://www.playstation.com/es-es/wallpapers/"])
+                    .spawn();
+            } else if msg == "bg-clear" {
+                set_key("bg", "");
+            } else if let Some(d) = msg.strip_prefix("bg:") {
+                if valid_bg(d) {
+                    set_key("bg", d);
+                }
             } else if let Some(id) = msg.strip_prefix("theme:") {
                 if valid_theme(id) {
                     set_key("theme", id);
