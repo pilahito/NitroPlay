@@ -99,12 +99,19 @@ jobs:
 
       - name: Setup shaderc
         run: |
-          $ProgressPreference = 'SilentlyContinue'
-          $url = ((Invoke-WebRequest -UseBasicParsing -Uri "https://storage.googleapis.com/shaderc/badges/build_link_windows_vs2019_release.html").Content | Select-String -Pattern 'url=(.*)"').Matches.Groups[1].Value
-          Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile .\shaderc.zip
-          Expand-Archive -LiteralPath "shaderc.zip" -DestinationPath "."
-          cp "./install/*" "./${{ env.dep_folder }}" -Force -Recurse
-          rm "./install" -r -force
+          # El enlace de Google (storage.googleapis.com/shaderc/badges) ya no existe: se usa shaderc del Vulkan SDK.
+          $sdk = "${{ env.VULKAN_SDK }}"
+          $need = @("$sdk\Include\shaderc\shaderc.h", "$sdk\Lib\shaderc_shared.lib", "$sdk\Bin\shaderc_shared.dll")
+          $missing = $need | Where-Object { -not (Test-Path $_) }
+          if ($missing) {
+            Write-Host "Falta en el Vulkan SDK:"; $missing
+            Get-ChildItem -Path $sdk -Recurse -Filter "shaderc*" | Select-Object -First 30 -ExpandProperty FullName
+            exit 1
+          }
+          New-Item -ItemType Directory -Force -Path "${{ env.dep_folder }}\bin","${{ env.dep_folder }}\lib","${{ env.dep_folder }}\include" | Out-Null
+          Copy-Item "$sdk\Bin\shaderc_shared.dll" "${{ env.dep_folder }}\bin" -Force
+          Copy-Item "$sdk\Lib\shaderc_shared.lib" "${{ env.dep_folder }}\lib" -Force
+          Copy-Item "$sdk\Include\shaderc" "${{ env.dep_folder }}\include" -Recurse -Force
 
       - name: Make build directory
         run: |
