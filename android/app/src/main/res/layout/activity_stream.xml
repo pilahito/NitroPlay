@@ -9,16 +9,31 @@
     tools:context=".stream.StreamActivity"
     android:keepScreenOn="true">
 
-    <com.metallic.chiaki.stream.AspectRatioFrameLayout
-        android:id="@+id/aspectRatioLayout"
+    <FrameLayout
+        android:id="@+id/videoBox"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.metallic.chiaki.stream.AspectRatioFrameLayout
+            android:id="@+id/aspectRatioLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center">
+            <SurfaceView
+                android:id="@+id/surfaceView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </com.metallic.chiaki.stream.AspectRatioFrameLayout>
+
+    </FrameLayout>
+
+    <ImageView
+        android:id="@+id/frameImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center">
-        <SurfaceView
-            android:id="@+id/surfaceView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </com.metallic.chiaki.stream.AspectRatioFrameLayout>
+        android:scaleType="fitXY"
+        android:importantForAccessibility="no"
+        android:visibility="gone"/>
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -74,6 +89,18 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:switchPadding="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:id="@+id/frameButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/stream_frame_none"
+                android:textColor="@color/stream_text"
+                app:strokeColor="@color/stream_text"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/displayModeToggle"/>
 
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/displayModeToggle"

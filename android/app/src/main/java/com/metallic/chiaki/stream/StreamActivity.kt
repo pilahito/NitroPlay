@@ -6,6 +6,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.AlertDialog
 import android.graphics.Matrix
+import android.graphics.Bitmap
 import android.os.*
 import android.view.*
 import android.widget.EditText
@@ -20,6 +21,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
+import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.metallic.chiaki.R
 import com.metallic.chiaki.common.Preferences
@@ -109,6 +111,23 @@ class StreamActivity : AppCompatActivity()
 			viewModel.setTouchpadOnlyEnabled(isChecked)
 			showOverlay()
 		}
+
+		framePacks = FramePacks.load(this)
+		frameId = PreferenceManager.getDefaultSharedPreferences(this).getString(FramePacks.PREF_KEY, "") ?: ""
+		binding.frameButton.setOnClickListener {
+			// recarga por si se han copiado marcos nuevos, y pasa al siguiente (el último vuelve a «sin marco»)
+			framePacks = FramePacks.load(this)
+			val ids = listOf("") + framePacks.map { it.id }
+			frameId = ids[(ids.indexOf(frameId) + 1) % ids.size]
+			PreferenceManager.getDefaultSharedPreferences(this).edit().putString(FramePacks.PREF_KEY, frameId).apply()
+			applyFrame()
+			showOverlay()
+		}
+		binding.root.addOnLayoutChangeListener { _, l, t, r, b, ol, ot, or_, ob ->
+			if(r - l != or_ - ol || b - t != ob - ot)
+				applyFrameInsets()
+		}
+		applyFrame()
 
 		binding.displayModeToggle.addOnButtonCheckedListener { _, _, _ ->
 			adjustStreamViewAspect()
@@ -343,6 +362,55 @@ class StreamActivity : AppCompatActivity()
 	}
 
 	private fun adjustStreamViewAspect() = adjustSurfaceViewAspect()
+
+	private var framePacks: List<FramePack> = emptyList()
+	private var frameId = ""
+	private var frameBitmapId: String? = null
+	private var frameBitmap: Bitmap? = null
+
+	private fun currentFrame(): FramePack? = framePacks.firstOrNull { it.id == frameId }
+
+	private fun applyFrame()
+	{
+		val pack = currentFrame()
+		if(pack == null)
+		{
+			binding.frameImage.setImageDrawable(null)
+			binding.frameImage.isGone = true
+			frameBitmap = null
+			frameBitmapId = null
+			binding.frameButton.text = getString(R.string.stream_frame_none)
+		}
+		else
+		{
+			if(frameBitmapId != pack.id)
+			{
+				frameBitmap = try { FramePacks.decode(pack) } catch(e: OutOfMemoryError) { null }
+				frameBitmapId = pack.id
+			}
+			binding.frameImage.setImageBitmap(frameBitmap)
+			binding.frameImage.isVisible = frameBitmap != null
+			binding.frameButton.text = getString(R.string.stream_frame_named, pack.name)
+		}
+		applyFrameInsets()
+	}
+
+	private fun applyFrameInsets()
+	{
+		val pack = currentFrame()
+		val w = binding.root.width
+		val h = binding.root.height
+		if(pack == null || frameBitmap == null || w <= 0 || h <= 0)
+		{
+			binding.videoBox.setPadding(0, 0, 0, 0)
+			return
+		}
+		val left = (w * pack.x).toInt()
+		val top = (h * pack.y).toInt()
+		val right = (w - w * (pack.x + pack.w)).toInt().coerceAtLeast(0)
+		val bottom = (h - h * (pack.y + pack.h)).toInt().coerceAtLeast(0)
+		binding.videoBox.setPadding(left, top, right, bottom)
+	}
 
 	override fun dispatchKeyEvent(event: KeyEvent) = viewModel.input.dispatchKeyEvent(event) || super.dispatchKeyEvent(event)
 	override fun onGenericMotionEvent(event: MotionEvent) = viewModel.input.onGenericMotionEvent(event) || super.onGenericMotionEvent(event)
