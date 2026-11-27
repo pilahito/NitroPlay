@@ -37,6 +37,8 @@ object PsnAccountIdFetcher
 		val userJson = request("$TOKEN_URL/$accessToken", "GET", auth, "application/json", null)
 		val userId = JSONObject(userJson).getString("user_id").toLong()
 
+		if(PsnNative.available)
+			return PsnNative.accountIdBase64(userId)
 		val bytes = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(userId).array()
 		return Base64.encodeToString(bytes, Base64.NO_WRAP)
 	}
