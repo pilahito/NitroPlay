@@ -19,6 +19,7 @@ const UI: &str = include_str!("ui.html");
 
 enum UiEvent {
     Login,
+    Bg(String),
     Code(String),
     Done(Result<String, String>),
 }
@@ -74,7 +75,7 @@ fn render(tab: &str, error: Option<&str>) -> String {
     let theme = get_key("theme").filter(|t| valid_theme(t)).unwrap_or_else(|| "nitroplay".into());
     let account = get_key("account").map(|a| js_safe(&a)).unwrap_or_else(|| "_".into());
     let error = error.map(js_safe).unwrap_or_else(|| "_".into());
-    let bg = get_key("bg").filter(|d| valid_bg(d)).unwrap_or_else(|| "_".into());
+    let bg = get_key(&format!("bg-{theme}")).filter(|d| valid_bg(d)).unwrap_or_else(|| "_".into());
     UI.replace("__THEME__", &theme)
         .replace("__ACCOUNT__", &account)
         .replace("__TAB__", tab)
@@ -137,14 +138,18 @@ fn main() {
                     .args(["url.dll,FileProtocolHandler", "https://www.playstation.com/es-es/wallpapers/"])
                     .spawn();
             } else if msg == "bg-clear" {
-                set_key("bg", "");
+                let t = get_key("theme").unwrap_or_else(|| "nitroplay".into());
+                set_key(&format!("bg-{t}"), "");
             } else if let Some(d) = msg.strip_prefix("bg:") {
                 if valid_bg(d) {
-                    set_key("bg", d);
+                    let t = get_key("theme").unwrap_or_else(|| "nitroplay".into());
+                    set_key(&format!("bg-{t}"), d);
                 }
             } else if let Some(id) = msg.strip_prefix("theme:") {
                 if valid_theme(id) {
                     set_key("theme", id);
+                    let d = get_key(&format!("bg-{id}")).filter(|d| valid_bg(d)).unwrap_or_default();
+                    let _ = ipc_proxy.send_event(UiEvent::Bg(d));
                 }
             }
         })
@@ -154,6 +159,9 @@ fn main() {
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
         match event {
+            Event::UserEvent(UiEvent::Bg(d)) => {
+                let _ = webview.evaluate_script(&format!("applyBg(\"{d}\")"));
+            }
             Event::UserEvent(UiEvent::Login) => {
                 let _ = webview.load_url(&login_url());
             }
