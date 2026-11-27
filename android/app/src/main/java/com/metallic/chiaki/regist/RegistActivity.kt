@@ -35,6 +35,9 @@ class RegistActivity: AppCompatActivity(), RevealActivity
 
 		private const val PIN_LENGTH = 8
 
+		private const val PREFS_NAME = "nitroplay"
+		private const val PREF_ACCOUNT_ID = "psn_account_id"
+
 		private const val REQUEST_REGIST = 1
 	}
 
@@ -56,6 +59,9 @@ class RegistActivity: AppCompatActivity(), RevealActivity
 
 		binding.hostEditText.setText(intent.getStringExtra(EXTRA_HOST) ?: "255.255.255.255")
 		binding.broadcastCheckBox.isChecked = intent.getBooleanExtra(EXTRA_BROADCAST, true)
+
+		// Atajo: el Account-ID guardado se rellena solo, asi solo falta el PIN
+		getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(PREF_ACCOUNT_ID, null)?.let { binding.psnIdEditText.setText(it) }
 
 		binding.registButton.setOnClickListener { doRegist() }
 		binding.psnLoginButton.setOnClickListener { startPsnLogin() }
@@ -113,9 +119,14 @@ class RegistActivity: AppCompatActivity(), RevealActivity
 		}
 		lifecycleScope.launch {
 			val result = withContext(Dispatchers.IO) { runCatching { PsnAccountIdFetcher.fetchAccountId(code) } }
-			result.onSuccess { binding.psnIdEditText.setText(it) }
+			result.onSuccess { binding.psnIdEditText.setText(it); saveAccountId(it) }
 				.onFailure { Toast.makeText(this@RegistActivity, R.string.regist_psn_login_failed, Toast.LENGTH_LONG).show() }
 		}
+	}
+
+	private fun saveAccountId(id: String)
+	{
+		getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().putString(PREF_ACCOUNT_ID, id).apply()
 	}
 
 	private fun doRegist()
@@ -157,6 +168,9 @@ class RegistActivity: AppCompatActivity(), RevealActivity
 
 		if(!hostValid || !psnIdValid || !pinValid)
 			return
+
+		if(ps4Version != RegistViewModel.ConsoleVersion.PS4_LT_7)
+			saveAccountId(psnId)
 
 		val target = when(ps4Version)
 		{
