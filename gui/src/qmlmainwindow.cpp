@@ -21,6 +21,13 @@ extern "C" {
 }
 
 #include <QByteArray>
+#include <QDir>
+#include <QFileInfo>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QUrl>
+#include <QVariantMap>
+#include <QRegularExpression>
 #include <QPointer>
 #include <QColor>
 #include <QDebug>
@@ -2871,6 +2878,101 @@ void QmlMainWindow::setVideoMode(VideoMode mode)
     emit videoModeChanged();
 }
 
+// ---- Marcos del usuario ----------------------------------------------------
+static QString framePacksDir()
+{
+#ifdef Q_OS_WIN
+    QString base = qEnvironmentVariable("APPDATA");
+    if (base.isEmpty())
+        base = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+    return QDir::cleanPath(base + "/NitroPlay/marcos");
+#else
+    return QDir::cleanPath(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/NitroPlay/marcos");
+#endif
+}
+
+void QmlMainWindow::reloadFramePacks()
+{
+    QVariantList packs;
+    QDir dir(framePacksDir());
+    const QStringList ids = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+    static const QRegularExpression valid_id("^[A-Za-z0-9_-]{1,64}$");
+    for (const QString &id : ids) {
+        if (packs.size() >= 60)
+            break;
+        if (!valid_id.match(id).hasMatch())
+            continue;
+        const QString img = dir.filePath(id + "/frame.png");
+        QFileInfo fi(img);
+        if (!fi.isFile() || fi.size() > 12 * 1024 * 1024)
+            continue;
+        QString name = id;
+        double x = 0, y = 0, w = 100, h = 100;
+        QFile jf(dir.filePath(id + "/theme.json"));
+        if (jf.open(QIODevice::ReadOnly)) {
+            const QJsonObject o = QJsonDocument::fromJson(jf.read(65536)).object();
+            if (o.value("name").isString() && !o.value("name").toString().trimmed().isEmpty())
+                name = o.value("name").toString().trimmed().left(60);
+            const QJsonObject v = o.value("viewport_rect").toObject();
+            if (v.contains("x") && v.contains("y") && v.contains("w") && v.contains("h")) {
+                double vx = v.value("x").toDouble(), vy = v.value("y").toDouble();
+                double vw = v.value("w").toDouble(), vh = v.value("h").toDouble();
+                // acepta fracciones 0..1 o porcentajes 0..100
+                if (vw <= 1.0 && vh <= 1.0) {
+                    vx *= 100; vy *= 100; vw *= 100; vh *= 100;
+                }
+                if (vx >= 0 && vy >= 0 && vw >= 5 && vh >= 5 && vx + vw <= 100.01 && vy + vh <= 100.01) {
+                    x = vx; y = vy; w = vw; h = vh;
+                }
+            }
+        }
+        QVariantMap m;
+        m["id"] = id;
+        m["name"] = name;
+        m["url"] = QUrl::fromLocalFile(img).toString();
+        m["x"] = x / 100.0; m["y"] = y / 100.0; m["w"] = w / 100.0; m["h"] = h / 100.0;
+        packs.append(m);
+    }
+    frame_packs = packs;
+    emit framePacksChanged();
+    // volver a aplicar el pack elegido (por si cambió el rectángulo)
+    const QString current = frame_pack;
+    frame_pack.clear();
+    setFramePack(current);
+}
+
+QString QmlMainWindow::framePackUrl() const
+{
+    for (const QVariant &v : frame_packs) {
+        const QVariantMap m = v.toMap();
+        if (m.value("id").toString() == frame_pack)
+            return m.value("url").toString();
+    }
+    return QString();
+}
+
+void QmlMainWindow::setFramePack(const QString &id)
+{
+    if (frame_pack == id)
+        return;
+    bool found = false;
+    for (const QVariant &v : frame_packs) {
+        const QVariantMap m = v.toMap();
+        if (m.value("id").toString() == id) {
+            frame_vx.store(m.value("x").toFloat());
+            frame_vy.store(m.value("y").toFloat());
+            frame_vw.store(m.value("w").toFloat());
+            frame_vh.store(m.value("h").toFloat());
+            found = true;
+            break;
+        }
+    }
+    frame_pack = found ? id : QString();
+    frame_pack_active.store(found);
+    QSettings().setValue("theme/framePack", frame_pack);
+    emit framePackChanged();
+}
+
 void QmlMainWindow::setThemeFrame(bool enabled)
 {
     if (theme_frame.load() == enabled)
@@ -4863,6 +4965,9 @@ void QmlMainWindow::doneOpenGLContextCurrent()
 void QmlMainWindow::init(Settings *settings, bool exit_app_on_stream_exit)
 {
     theme_frame.store(QSettings().value("theme/frame", false).toBool());
+    reloadFramePacks();
+    setFramePack(QSettings().value("theme/framePack", "").toString());
+    connect(this, &QWindow::windowStateChanged, this, [this](Qt::WindowState) { emit frameFullscreenChanged(); });
     bypass_frame_queue = settings->GetDirectFrameMapping();
     render_backend = settings->GetRenderBackend();
     setSurfaceType(render_backend == RenderBackend::Vulkan ? QWindow::VulkanSurface : QWindow::OpenGLSurface);
@@ -7536,9 +7641,20 @@ void QmlMainWindow::render()
         pl_rect2df crop = hint_frame->crop;
         switch (video_mode) {
         case VideoMode::Normal:
+            if (theme_frame.load() && frame_pack_active.load() && windowState() != Qt::WindowFullScreen) {
+                // marco del usuario: el vídeo va dentro del hueco indicado por el pack
+                const float w = pl_rect_w(target_frame.crop), h = pl_rect_h(target_frame.crop);
+                const float x0 = target_frame.crop.x0, y0 = target_frame.crop.y0;
+                target_frame.crop.x0 = x0 + w * frame_vx.load();
+                target_frame.crop.y0 = y0 + h * frame_vy.load();
+                target_frame.crop.x1 = x0 + w * (frame_vx.load() + frame_vw.load());
+                target_frame.crop.y1 = y0 + h * (frame_vy.load() + frame_vh.load());
+                pl_rect2df_aspect_copy(&target_frame.crop, &crop, 0.0);
+                break;
+            }
             pl_rect2df_aspect_copy(&target_frame.crop, &crop, 0.0);
             // leave room around the game for the theme frame drawn by StreamView
-            if (theme_frame.load())
+            if (theme_frame.load() && windowState() != Qt::WindowFullScreen)
                 pl_rect2df_stretch(&target_frame.crop, themeFrameScale(), themeFrameScale());
             break;
         case VideoMode::Stretch:

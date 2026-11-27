@@ -597,6 +597,35 @@ DialogView {
 
                         Label {
                             Layout.alignment: Qt.AlignRight
+                            text: qsTr("Marco de juego:")
+                        }
+
+                        RowLayout {
+                            C.ComboBox {
+                                id: framePackCombo
+                                Layout.preferredWidth: 300
+                                readonly property var packList: Chiaki.window.framePacks
+                                model: [qsTr("Ninguno (dibujo del tema)")].concat(packList.map(p => p.name))
+                                currentIndex: {
+                                    for (let i = 0; i < packList.length; ++i)
+                                        if (packList[i].id === Chiaki.window.framePack)
+                                            return i + 1;
+                                    return 0;
+                                }
+                                onActivated: index => {
+                                    Chiaki.window.framePack = index === 0 ? "" : packList[index - 1].id;
+                                    if (index > 0)
+                                        Chiaki.window.themeFrame = true;
+                                }
+                            }
+                            C.Button {
+                                text: qsTr("Recargar")
+                                onClicked: Chiaki.window.reloadFramePacks()
+                            }
+                        }
+
+                        Label {
+                            Layout.alignment: Qt.AlignRight
                             text: qsTr("(Sin marcar)")
                         }
 

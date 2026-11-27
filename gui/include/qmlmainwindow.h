@@ -4,6 +4,9 @@
 #include "settings.h"
 
 #include <QMutex>
+#include <QVariantList>
+#include <QRectF>
+#include <QString>
 #include <QAtomicInteger>
 #include <QWindow>
 #include <QQuickWindow>
@@ -65,6 +68,11 @@ class QmlMainWindow : public QWindow
     // «Marco del tema»: la imagen del juego se encoge un poco y el tema la rodea
     Q_PROPERTY(bool themeFrame READ themeFrame WRITE setThemeFrame NOTIFY themeFrameChanged)
     Q_PROPERTY(float themeFrameScale READ themeFrameScale CONSTANT)
+    // Marcos del usuario: carpeta <APPDATA>/NitroPlay/marcos/<id>/{frame.png,theme.json}
+    Q_PROPERTY(QVariantList framePacks READ framePacks NOTIFY framePacksChanged)
+    Q_PROPERTY(QString framePack READ framePack WRITE setFramePack NOTIFY framePackChanged)
+    Q_PROPERTY(QString framePackUrl READ framePackUrl NOTIFY framePackChanged)
+    Q_PROPERTY(bool frameFullscreen READ frameFullscreen NOTIFY frameFullscreenChanged)
     Q_PROPERTY(VideoPreset videoPreset READ videoPreset WRITE setVideoPreset NOTIFY videoPresetChanged)
     Q_PROPERTY(bool directStream READ directStream NOTIFY directStreamChanged)
     Q_PROPERTY(int runtimeRendererBackend READ runtimeRendererBackend CONSTANT)
@@ -129,6 +137,12 @@ public:
     bool themeFrame() const { return theme_frame.load(); }
     void setThemeFrame(bool enabled);
     float themeFrameScale() const { return 0.86f; }
+    QVariantList framePacks() const { return frame_packs; }
+    QString framePack() const { return frame_pack; }
+    QString framePackUrl() const;
+    void setFramePack(const QString &id);
+    bool frameFullscreen() const { return windowState() == Qt::WindowFullScreen; }
+    Q_INVOKABLE void reloadFramePacks();
     void setZoomFactor(float factor);
 
     double queueDepthAverage() const;
@@ -181,6 +195,9 @@ signals:
     void keepVideoChanged();
     void videoModeChanged();
     void themeFrameChanged();
+    void framePacksChanged();
+    void framePackChanged();
+    void frameFullscreenChanged();
     void zoomFactorChanged();
     void videoPresetChanged();
     void menuRequested();
@@ -329,6 +346,11 @@ private:
     VideoMode video_mode = VideoMode::Normal;
     float zoom_factor = 0;
     std::atomic<bool> theme_frame { false };
+    QVariantList frame_packs;
+    QString frame_pack;
+    // zona del vídeo dentro de la ventana, en fracciones 0..1
+    std::atomic<float> frame_vx { 0.0f }, frame_vy { 0.0f }, frame_vw { 1.0f }, frame_vh { 1.0f };
+    std::atomic<bool> frame_pack_active { false };
     VideoPreset video_preset = VideoPreset::HighQuality;
     Settings *settings = {};
 

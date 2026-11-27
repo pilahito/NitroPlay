@@ -290,6 +290,7 @@ Item {
         z: -1
         visible: Chiaki.window.themeFrame && Chiaki.window.videoMode == ChiakiWindow.VideoMode.Normal
                  && Chiaki.window.hasVideo && !sessionError
+                 && Chiaki.window.framePack === "" && !Chiaki.window.frameFullscreen
         readonly property real fit: Math.min(width / 16, height / 9) * Chiaki.window.themeFrameScale
         readonly property real videoW: 16 * fit
         readonly property real videoH: 9 * fit
@@ -328,6 +329,24 @@ Item {
             border.color: root.currentTheme.accent
         }
     }
+
+    // Marco del usuario (PNG con el hueco transparente). Se oculta solo en pantalla completa.
+    Image {
+        id: userFrame
+        anchors.fill: parent
+        source: Chiaki.window.framePackUrl
+        fillMode: Image.Stretch
+        smooth: true
+        asynchronous: true
+        cache: false
+        enabled: false
+        visible: status === Image.Ready && Chiaki.window.themeFrame && Chiaki.window.framePack !== ""
+                 && !Chiaki.window.frameFullscreen
+                 && Chiaki.window.videoMode == ChiakiWindow.VideoMode.Normal
+                 && Chiaki.window.hasVideo && !sessionError
+    }
+
+    Shortcut { sequence: "F9"; onActivated: Chiaki.window.themeFrame = !Chiaki.window.themeFrame }
 
     // volumen del juego desde el teclado: Ctrl+M silencia, Ctrl+↑ / Ctrl+↓ suben y bajan
     Shortcut { sequence: "Ctrl+M"; onActivated: { Chiaki.settings.toggleAudioMute(); volumeToast.show() } }
