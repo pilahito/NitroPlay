@@ -117,3 +117,26 @@ mod tests {
         assert_eq!(h, format!("Basic {}", base64_encode(b"ba495a24-818c-472b-b12d-ff231c1b5745:mvaiZkRsAsI1IBkY")));
     }
 }
+
+#[cfg(test)]
+mod edge_tests {
+    use super::*;
+
+    #[test]
+    fn code_from_redirect_url_empty_query() {
+        let url = "https://remoteplay.dl.playstation.net/remoteplay/redirect?";
+        assert_eq!(code_from_redirect_url(url), None);
+    }
+
+    #[test]
+    fn code_from_redirect_url_no_code_param() {
+        let url = "https://remoteplay.dl.playstation.net/remoteplay/redirect?state=x";
+        assert_eq!(code_from_redirect_url(url), None);
+    }
+
+    #[test]
+    fn parse_user_id_empty_json() {
+        assert_eq!(parse_user_id(""), None);
+    }
+}
+
