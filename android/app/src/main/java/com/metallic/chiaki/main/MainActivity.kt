@@ -40,6 +40,8 @@ class MainActivity : AppCompatActivity()
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState)
+		// crea Android/data/<app>/files/marcos para poder copiar marcos con adb
+		com.metallic.chiaki.stream.FramePacks.dir(this)
 		binding = ActivityMainBinding.inflate(layoutInflater)
 		setContentView(binding.root)
 
