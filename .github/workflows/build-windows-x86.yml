@@ -21,6 +21,7 @@ jobs:
       sdl2_compat_tag: 2.32.74
       # CMake 4 quitó la compatibilidad < 3.5 y json-c (vcpkg) aún la pide
       CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+      VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}\ci-triplets
 
     defaults:
       run:
