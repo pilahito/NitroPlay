@@ -10,6 +10,7 @@ path = "src/main.rs"
 
 [dependencies]
 psn-account = { path = "../psn-account" }
+nitroplay-core = { path = "../nitroplay-core" }
 ureq = "3"
 wry = "0.57"
 tao = "0.37"

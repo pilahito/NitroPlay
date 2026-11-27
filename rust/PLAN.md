@@ -11,17 +11,17 @@ Estado: [hecho] / [parcial] / [pendiente]. Nada marcado [hecho] sin prueba.
 (hoy la GUI trae su propia copia de la busqueda).
 
 ## Fase 2 - Registro de consola con PIN  [parcial: llamada real hecha, sin consola]
-`chiaki-sys` (bindings bindgen de libchiaki) + `nitroplay-core::regist` (feature `chiaki`) llaman a `chiaki_regist_start`.
+Registro en Rust puro (`nitroplay-core`: `rpcrypt`, `regist_payload`, `regist_net`). `nitroplay-ref-sys` (bindings a la libreria C) solo sirve de oraculo en pruebas (feature `ref-c`).
 Probado: la libreria arranca y, sin consola, el registro falla limpiamente. NO probado contra una PS5 real.
-Compilar con `CHIAKI_BUILD_DIR=<build cmake de libchiaki> cargo test -p nitroplay-core --features chiaki`.
+Oraculo opcional: `NITROPLAY_REF_BUILD_DIR=<build cmake de la libreria C> cargo test -p nitroplay-core --features ref-c`.
 
 ## Fase 3 - Sesion de juego remoto  [pendiente]
-`nitroplay-core::session`. Video/audio (HDR, H265) siguen en el nucleo chiaki-ng.
+`nitroplay-core::session`. Video/audio (HDR, H265): se escriben en Rust; sin hacer.
 Internet/otra cuenta PSN: cada cuenta necesita su Account-ID y su registro; sin verificar.
 
 ## Fase 4 - Distribucion  [parcial]
 Android: CI con Rust + APK (android-v11). Windows streaming: CI en `windows-build`, bloqueado en dependencias externas.
-Quest: instalar APK desde Arch (apagado). Renombrado chiaki->nitroplay: parcial.
+Quest: instalar APK desde Arch (apagado). Renombrado a nitroplay: hecho en el workspace Rust; el arbol C++/Qt y el paquete JNI `com.metallic.chiaki` siguen con el nombre antiguo.
 
 ## Reglas
 - Sin credenciales en el repositorio; el PIN no se guarda.

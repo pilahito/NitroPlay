@@ -1,0 +1,9 @@
+[package]
+name = "nitroplay-ref-sys"
+version = "0.1.0"
+edition = "2021"
+description = "Bindings a la libreria C de referencia (solo para pruebas de equivalencia, nunca en el binario final). Generados con bindgen desde lib/include."
+build = "build.rs"
+
+[build-dependencies]
+bindgen = "0.71"

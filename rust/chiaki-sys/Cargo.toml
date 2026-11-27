@@ -1,9 +1,0 @@
-[package]
-name = "chiaki-sys"
-version = "0.1.0"
-edition = "2021"
-description = "Bindings FFI a libchiaki (registro con PIN, sesion de Remote Play). Generados con bindgen desde lib/include."
-build = "build.rs"
-
-[build-dependencies]
-bindgen = "0.71"
