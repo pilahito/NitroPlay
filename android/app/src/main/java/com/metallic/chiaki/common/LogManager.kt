@@ -12,7 +12,7 @@ import java.util.regex.Pattern
 val fileProviderAuthority = "org.nitroplay.android.fileprovider"
 private const val baseDirName = "session_logs" // must be in sync with filepaths.xml
 private val dateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS", Locale.US)
-private const val filePrefix = "chiaki_session_"
+private const val filePrefix = "nitroplay_session_"
 private const val filePostfix = ".log"
 private val fileRegex = Regex("$filePrefix(.*)$filePostfix")
 private const val keepLogFilesCount = 5

@@ -62,10 +62,10 @@ jobs:
             echo "::warning::Sin secretos de firma: se uso una clave temporal. Las actualizaciones no se podran instalar encima de versiones anteriores."
           fi
           {
-            echo "chiakiKeystore=$KS"
-            echo "chiakiKeystorePW=$PW"
-            echo "chiakiKeyAlias=$ALIAS"
-            echo "chiakiKeyPW=$PW"
+            echo "nitroplayKeystore=$KS"
+            echo "nitroplayKeystorePW=$PW"
+            echo "nitroplayKeyAlias=$ALIAS"
+            echo "nitroplayKeyPW=$PW"
           } > android/local.properties
 
       - name: Compilar el APK
