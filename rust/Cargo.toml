@@ -1,3 +1,4 @@
 [workspace]
 resolver = "2"
-members = ["psn-account"]
+members = ["psn-account", "psn-jni"]
+

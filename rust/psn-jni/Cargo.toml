@@ -1,0 +1,12 @@
+[package]
+name = "psn-jni"
+version = "0.1.0"
+edition = "2021"
+description = "Puente JNI: expone psn-account a Kotlin (NitroPlay)"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+jni = "0.22"
+psn-account = { path = "../psn-account" }
