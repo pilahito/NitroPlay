@@ -1,0 +1,7 @@
+[package]
+name = "nitroplay-core"
+version = "0.1.0"
+edition = "2021"
+description = "Marco de NitroPlay: descubrimiento, PIN/registro y sesion de juego remoto (sin dependencias)"
+
+[dependencies]

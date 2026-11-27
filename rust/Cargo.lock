@@ -1227,6 +1227,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "nitroplay-core"
+version = "0.1.0"
+
+[[package]]
 name = "nitroplay-gui"
 version = "0.1.0"
 dependencies = [
