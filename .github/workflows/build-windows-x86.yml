@@ -175,27 +175,17 @@ jobs:
           cp build\gui\chiaki.exe chiaki-ng-Win\NitroPlay.exe
           cp build\third-party\cpp-steam-tools\cpp-steam-tools.dll chiaki-ng-Win
           cp scripts\qtwebengine_import.qml gui\src\qml\
-          cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\libcrypto-*-x64.dll" chiaki-ng-Win
-          cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\libssl-*-x64.dll" chiaki-ng-Win
-          cp "${{ github.workspace }}\${{ env.dep_folder }}\bin\SDL2.dll" chiaki-ng-Win
-          cp "${{ github.workspace }}\${{ env.dep_folder }}\bin\SDL3.dll" chiaki-ng-Win
-          # hidapi y fftw3 solo existen en la version nativa de Steam Deck: se copian solo si estan instaladas
-          foreach ($opt in @("hidapi.dll", "fftw3.dll")) {
-            $src = Join-Path "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin" $opt
-            if (Test-Path $src) { cp $src chiaki-ng-Win }
+          # Se copian TODAS las DLL de vcpkg y de las dependencias compiladas aparte: asi no falta ninguna en tiempo de ejecucion
+          $vcpkgBin = "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin"
+          $depBin = "${{ github.workspace }}\${{ env.dep_folder }}\bin"
+          foreach ($dir in @($vcpkgBin, $depBin)) {
+            if (Test-Path $dir) { Get-ChildItem -Path $dir -Filter "*.dll" | Copy-Item -Destination chiaki-ng-Win -Force }
           }
-          cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\opus.dll" chiaki-ng-Win
-          cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\libspeexdsp.dll" chiaki-ng-Win
-          cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\lcms2.dll" chiaki-ng-Win
-          cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\miniupnpc.dll" chiaki-ng-Win
-          cp "${env:VCPKG_INSTALLED_DIR}\${{ env.triplet }}\bin\json-c.dll" chiaki-ng-Win
-          cp "${{ github.workspace }}\${{ env.dep_folder }}\bin\swresample-*.dll" chiaki-ng-Win
-          cp "${{ github.workspace }}\${{ env.dep_folder }}\bin\avcodec-*.dll" chiaki-ng-Win
-          cp "${{ github.workspace }}\${{ env.dep_folder }}\bin\avutil-*.dll" chiaki-ng-Win
-          cp "${{ github.workspace }}\${{ env.dep_folder }}\bin\avformat-*.dll" chiaki-ng-Win
-          cp "${{ github.workspace }}\${{ env.dep_folder }}\bin\libplacebo-*.dll" chiaki-ng-Win
-          cp "${{ github.workspace }}\${{ env.dep_folder }}\bin\shaderc_shared.dll" chiaki-ng-Win
-          cp "${{ github.workspace }}\${{ env.dep_folder }}\bin\spirv-cross-c-shared.dll" chiaki-ng-Win
+          # Comprobacion: lo imprescindible tiene que estar; si no, el error dice cual falta
+          foreach ($pat in @("SDL2.dll", "avcodec-*.dll", "avformat-*.dll", "avutil-*.dll", "swresample-*.dll", "libplacebo-*.dll", "libcrypto-*.dll", "libssl-*.dll", "opus.dll")) {
+            if (-not (Get-ChildItem -Path chiaki-ng-Win -Filter $pat)) { Write-Error "Falta en el paquete: $pat"; exit 1 }
+          }
+          Get-ChildItem chiaki-ng-Win -Filter "*.dll" | Select-Object -ExpandProperty Name
           windeployqt.exe --no-translations --qmldir=gui\src\qml --release chiaki-ng-Win\NitroPlay.exe
 
       - name: Package chiaki-ng
