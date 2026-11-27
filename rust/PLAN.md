@@ -10,9 +10,10 @@ Estado: [hecho] / [parcial] / [pendiente]. Nada marcado [hecho] sin prueba.
 `nitroplay-core::{discovery,pin}` tiene la logica pura con tests; falta que la GUI use ese crate
 (hoy la GUI trae su propia copia de la busqueda).
 
-## Fase 2 - Registro de consola con PIN  [pendiente]
-`nitroplay-core::regist` solo define el contrato. Hay que portar `lib/src/regist.c` y `lib/src/rpcrypt.c`
-de chiaki (TCP 9295). Criterio de cierre: registrar una PS5 real. Hasta entonces, el PIN se escribe en Android.
+## Fase 2 - Registro de consola con PIN  [parcial: llamada real hecha, sin consola]
+`chiaki-sys` (bindings bindgen de libchiaki) + `nitroplay-core::regist` (feature `chiaki`) llaman a `chiaki_regist_start`.
+Probado: la libreria arranca y, sin consola, el registro falla limpiamente. NO probado contra una PS5 real.
+Compilar con `CHIAKI_BUILD_DIR=<build cmake de libchiaki> cargo test -p nitroplay-core --features chiaki`.
 
 ## Fase 3 - Sesion de juego remoto  [pendiente]
 `nitroplay-core::session`. Video/audio (HDR, H265) siguen en el nucleo chiaki-ng.

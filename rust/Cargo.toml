@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["psn-account", "psn-jni", "nitroplay-core", "nitroplay-cli", "nitroplay-gui"]
+members = ["psn-account", "psn-jni", "nitroplay-core", "chiaki-sys", "nitroplay-cli", "nitroplay-gui"]
 
 
 
