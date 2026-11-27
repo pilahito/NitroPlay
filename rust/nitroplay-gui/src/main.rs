@@ -1,11 +1,13 @@
-//! NitroPlay (Windows): login de PSN dentro de la ventana. Al llegar la redireccion de Sony
-//! se corta la navegacion, se saca el `code` y se muestra el Account-ID. Todo en Rust.
+﻿//! NitroPlay (Windows): interfaz con temas, cuenta PSN integrada y guia de HDR/calidad.
+//! El login de Sony va dentro de la ventana: se corta la redireccion, se saca el `code`
+//! y se calcula el Account-ID. Todo en Rust (wry + tao).
 #![windows_subsystem = "windows"]
 
 use psn_account::{
     account_id_base64, basic_auth_header, code_from_redirect_url, login_url, parse_access_token,
     parse_user_id, token_body, REDIRECT_URI, TOKEN_URL,
 };
+use std::path::PathBuf;
 use tao::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoopBuilder},
@@ -13,9 +15,62 @@ use tao::{
 };
 use wry::WebViewBuilder;
 
+const UI: &str = include_str!("ui.html");
+
 enum UiEvent {
+    Login,
     Code(String),
     Done(Result<String, String>),
+}
+
+// ---- configuracion en %APPDATA%\NitroPlay\config.txt (lineas clave=valor) ----
+fn config_path() -> Option<PathBuf> {
+    std::env::var_os("APPDATA").map(|a| PathBuf::from(a).join("NitroPlay").join("config.txt"))
+}
+
+fn get_key(key: &str) -> Option<String> {
+    let text = std::fs::read_to_string(config_path()?).ok()?;
+    text.lines()
+        .filter_map(|l| l.split_once('='))
+        .find(|(k, _)| *k == key)
+        .map(|(_, v)| v.trim().to_string())
+        .filter(|v| !v.is_empty())
+}
+
+fn set_key(key: &str, value: &str) {
+    let Some(path) = config_path() else { return };
+    let mut lines: Vec<String> = std::fs::read_to_string(&path)
+        .unwrap_or_default()
+        .lines()
+        .filter(|l| l.split_once('=').map(|(k, _)| k != key).unwrap_or(false))
+        .map(String::from)
+        .collect();
+    lines.push(format!("{key}={value}"));
+    if let Some(dir) = path.parent() {
+        let _ = std::fs::create_dir_all(dir);
+    }
+    let _ = std::fs::write(path, lines.join("\n"));
+}
+
+/// Los ids de tema solo llevan letras, numeros y guiones (se validan antes de guardar).
+fn valid_theme(id: &str) -> bool {
+    !id.is_empty() && id.len() <= 20 && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
+}
+
+fn js_safe(s: &str) -> String {
+    s.chars()
+        .filter(|c| c.is_ascii_alphanumeric() || " .,:;_-+/=()".contains(*c))
+        .collect()
+}
+
+fn render(tab: &str, error: Option<&str>) -> String {
+    let theme = get_key("theme").filter(|t| valid_theme(t)).unwrap_or_else(|| "nitroplay".into());
+    let account = get_key("account").map(|a| js_safe(&a)).unwrap_or_else(|| "_".into());
+    let error = error.map(js_safe).unwrap_or_else(|| "_".into());
+    UI.replace("__THEME__", &theme)
+        .replace("__ACCOUNT__", &account)
+        .replace("__TAB__", tab)
+        .replace("__ERROR__", &error)
 }
 
 fn fetch_account_id(code: &str) -> Result<String, String> {
@@ -43,38 +98,18 @@ fn fetch_account_id(code: &str) -> Result<String, String> {
     Ok(account_id_base64(user_id))
 }
 
-fn escape(s: &str) -> String {
-    s.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;")
-}
-
-const STYLE: &str = "body{font-family:Segoe UI,sans-serif;background:#0f1424;color:#e8ecf8;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}.box{max-width:560px;text-align:center;padding:24px}h1{color:#6ea8ff}input{font-family:Consolas,monospace;letter-spacing:2px;font-size:26px;text-align:center;width:100%;padding:12px;border-radius:8px;border:1px solid #3a4770;background:#1a2138;color:#fff}button{margin-top:14px;padding:10px 22px;font-size:16px;border:0;border-radius:8px;background:#3d7bff;color:#fff;cursor:pointer}small{color:#93a0c8}";
-
-fn page_wait() -> String {
-    format!("<html><head><meta charset='utf-8'><style>{STYLE}</style></head><body><div class='box'><h1>NitroPlay</h1><p>Sesion iniciada. Obteniendo tu Account-ID...</p></div></body></html>")
-}
-
-fn page_result(result: &Result<String, String>) -> String {
-    let inner = match result {
-        Ok(id) => format!(
-            "<h1>Tu Account-ID</h1><input id='i' readonly value='{}' onclick='this.select()'><br><button onclick=\"var e=document.getElementById('i');e.select();document.execCommand('copy');this.textContent='Copiado'\">Copiar</button><p><small>Pegalo en el registro de la consola de NitroPlay junto al PIN de 8 digitos de la PS4/PS5.</small></p>",
-            escape(id)
-        ),
-        Err(e) => format!("<h1>No se pudo obtener el ID</h1><p>{}</p><p><small>Cierra la ventana y vuelve a intentarlo.</small></p>", escape(e)),
-    };
-    format!("<html><head><meta charset='utf-8'><style>{STYLE}</style></head><body><div class='box'>{inner}</div></body></html>")
-}
-
 fn main() {
     let event_loop = EventLoopBuilder::<UiEvent>::with_user_event().build();
     let proxy = event_loop.create_proxy();
     let window = WindowBuilder::new()
-        .with_title("NitroPlay - Login de PSN")
+        .with_title("NitroPlay")
         .build(&event_loop)
         .unwrap();
 
     let nav_proxy = proxy.clone();
+    let ipc_proxy = proxy.clone();
     let webview = WebViewBuilder::new()
-        .with_url(login_url())
+        .with_html(render("inicio", None))
         .with_navigation_handler(move |url: String| {
             if url.starts_with(REDIRECT_URI) {
                 if let Some(code) = code_from_redirect_url(&url) {
@@ -84,21 +119,41 @@ fn main() {
             }
             true
         })
+        .with_ipc_handler(move |req| {
+            let msg: &str = req.body();
+            if msg == "login" {
+                let _ = ipc_proxy.send_event(UiEvent::Login);
+            } else if let Some(id) = msg.strip_prefix("theme:") {
+                if valid_theme(id) {
+                    set_key("theme", id);
+                }
+            }
+        })
         .build(&window)
         .unwrap();
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
         match event {
+            Event::UserEvent(UiEvent::Login) => {
+                let _ = webview.load_url(&login_url());
+            }
             Event::UserEvent(UiEvent::Code(code)) => {
-                let _ = webview.load_html(&page_wait());
+                let _ = webview.load_html(&render("cuenta", Some("Obteniendo tu Account-ID...")));
                 let p = proxy.clone();
                 std::thread::spawn(move || {
                     let _ = p.send_event(UiEvent::Done(fetch_account_id(&code)));
                 });
             }
             Event::UserEvent(UiEvent::Done(result)) => {
-                let _ = webview.load_html(&page_result(&result));
+                let html = match result {
+                    Ok(id) => {
+                        set_key("account", &id);
+                        render("cuenta", None)
+                    }
+                    Err(e) => render("cuenta", Some(&format!("No se pudo obtener el ID: {e}"))),
+                };
+                let _ = webview.load_html(&html);
             }
             Event::WindowEvent { event: WindowEvent::CloseRequested, .. } => {
                 *control_flow = ControlFlow::Exit;
