@@ -5,6 +5,7 @@
 //! Licencia: AGPL-3.0-only. Los modulos `discovery`, `rpcrypt`, `rpcrypt_tables`, `regist_payload` y `regist_net`
 //! estan portados del protocolo documentado en chiaki-ng (AGPL-3.0-only con excepcion OpenSSL); se conserva su atribucion.
 pub mod discovery;
+pub mod pack;
 pub mod pin;
 pub mod regist;
 pub mod regist_net;

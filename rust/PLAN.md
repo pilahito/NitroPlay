@@ -95,3 +95,10 @@ Estado de cada paso: ver `docs/STATE.md`.
 - `temas/<id>/theme.json`: `id`, `name`, `system`, `frame`, `accent_color`, `accent_rgb`, `viewport_rect` (fracciones 0..1), `viewport_px` (píxeles, debe coincidir con `viewport_rect`) y `resolution` ([ancho, alto]).
 - No hay `wallpaper.png` en este pack; el campo es opcional.
 - `README.txt` y `originales/` (imágenes sin procesar, ~27 MB) están en el zip: no se versionan en git.
+
+## 7. Actualizador desde GitHub y Novedades (obligatorio, todas las plataformas)
+Especificación completa en `CLAUDE.md` (sección "Actualizador desde GitHub y Novedades"). Resumen de fases:
+- Fase A (`nitroplay-core::updater`): parseo de releases, SemVer, pre-releases, selección de asset, changelog. Tests sin red.
+- Fase B (`nitroplay-gui`, Windows): descarga con progreso, SHA-256 y "Actualizar y reiniciar" con script auxiliar.
+- Fase C (Android/Quest, Fase 4 del plan): contrato listo; descarga a caché e instalador nativo.
+Estado: NO iniciado. Depende de cerrar el Bloque 3 (`ui.html` sin degradados + `nitroplay-gui` compilando).
