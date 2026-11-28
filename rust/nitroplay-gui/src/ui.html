@@ -1,25 +1,26 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><title>NitroPlay</title>
 <style>
-:root{--c1:#0f1424;--c2:#3d7bff;--c3:#6ea8ff}
+:root{--c1:#0f1424;--c2:#3d7bff;--c3:#6ea8ff;--acc:#3d7bff}
 *{box-sizing:border-box}
 body{margin:0;font-family:"Segoe UI",sans-serif;color:#eef2ff;height:100vh;overflow:hidden;
-background:radial-gradient(circle at 15% 15%,color-mix(in srgb,var(--c2) 40%,transparent),transparent 55%),radial-gradient(circle at 85% 90%,color-mix(in srgb,var(--c3) 35%,transparent),transparent 50%),linear-gradient(160deg,var(--c1),#000 140%);transition:background .4s}
-#app{display:flex;height:100vh}
+background:radial-gradient(circle at 15% 15%,color-mix(in srgb,var(--c2) 40%,transparent),transparent 55%),radial-gradient(circle at 85% 90%,color-mix(in srgb,var(--c3) 35%,transparent),transparent 50%),var(--c1);transition:background .4s}
+#veil{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;pointer-events:none;z-index:0}
+#app{display:flex;height:100vh;position:relative;z-index:1}
 aside{width:210px;background:rgba(0,0,0,.35);padding:20px 14px;display:flex;flex-direction:column;gap:6px;backdrop-filter:blur(6px)}
 .logo{font-size:24px;font-weight:700;color:var(--c3);margin:0 6px 18px;letter-spacing:1px}
 nav button{width:100%;text-align:left;background:transparent;border:0;color:#cdd6f4;padding:11px 12px;border-radius:9px;font-size:15px;cursor:pointer}
-nav button:hover{background:rgba(255,255,255,.08)}nav button.on{background:var(--c2);color:#fff}
+nav button:hover{background:rgba(255,255,255,.08)}nav button.on{background:var(--acc);color:#fff}
 main{flex:1;padding:28px 34px;overflow:auto}
 section{display:none}section.on{display:block}
 h1{margin:0 0 6px;font-size:28px}h2{margin:22px 0 8px;font-size:18px;color:var(--c3)}
 p,li{color:#c8d0ea;line-height:1.55}.card{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:18px;margin:12px 0;max-width:640px}
-button.p{background:var(--c2);color:#fff;border:0;border-radius:9px;padding:11px 22px;font-size:15px;cursor:pointer}
+button.p{background:var(--acc);color:#fff;border:0;border-radius:9px;padding:11px 22px;font-size:15px;cursor:pointer}
 button.p:hover{filter:brightness(1.15)}
 code,.id{font-family:Consolas,monospace}.id{font-size:26px;letter-spacing:2px;background:rgba(0,0,0,.4);padding:10px 14px;border-radius:9px;display:inline-block;margin:8px 0;user-select:all}
 .err{background:#5b1a1a;border:1px solid #b44;padding:10px 14px;border-radius:9px;max-width:640px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-top:14px}
-.fila{display:flex;gap:14px;flex-wrap:wrap;align-items:center}.fila label{display:flex;flex-direction:column;gap:4px;font-size:13px}.small{font-size:12px;opacity:.75}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chip{background:rgba(255,255,255,.1);color:#fff;border:0;border-radius:99px;padding:7px 16px;cursor:pointer;font-size:13px}.chip.on{background:var(--c2)}
+.fila{display:flex;gap:14px;flex-wrap:wrap;align-items:center}.fila label{display:flex;flex-direction:column;gap:4px;font-size:13px}.small{font-size:12px;opacity:.75}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chip{background:rgba(255,255,255,.1);color:#fff;border:0;border-radius:99px;padding:7px 16px;cursor:pointer;font-size:13px}.chip.on{background:var(--acc)}
 .pv{height:96px;border-radius:9px 9px 0 0;position:relative;overflow:hidden}.pv i{position:absolute;left:0;top:0;bottom:0;width:26%;background:rgba(0,0,0,.45)}.pv b{position:absolute;left:32%;top:14px;width:46%;height:9px;border-radius:5px;background:rgba(255,255,255,.85)}.pv u{position:absolute;left:32%;top:34px;width:30%;height:22px;border-radius:6px;background:var(--pc)}
 .tn{padding:9px 12px;background:rgba(0,0,0,.55);border-radius:0 0 9px 9px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center}.tn small{font-weight:400;opacity:.7}
 .tick{display:none;background:#fff;color:#000;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:700}.t.on .tick{display:inline-block}
@@ -31,24 +32,17 @@ code,.id{font-family:Consolas,monospace}.id{font-size:26px;letter-spacing:2px;ba
 .fr{position:absolute;inset:0;pointer-events:none;display:none}.fr.on{display:block}
 .fr i{position:absolute;font-style:normal;font-size:calc(var(--th)*1.6 + 10px);display:none}
 .fr i:nth-child(1){left:1.2%;top:1%}.fr i:nth-child(2){right:1.2%;top:1%}.fr i:nth-child(3){left:1.2%;bottom:1%}.fr i:nth-child(4){right:1.2%;bottom:1%}
-.f-fire{border:var(--th) solid #b3260e;border-image:linear-gradient(135deg,#ffb347,#ff4500 40%,#7a0000) 1;box-shadow:inset 0 0 40px #ff450099,inset 0 0 8px #ffd27a}
+.f-fire{border:var(--th) solid #b3260e;box-shadow:inset 0 0 40px #ff450099,inset 0 0 8px #ffd27a}
 .f-fire i{display:block;color:#ffb347;text-shadow:0 0 8px #ff4500}
 .f-neon{border:var(--th) solid #14f4ff;box-shadow:inset 0 0 22px #14f4ff,inset 0 0 50px #ff2bd666,0 0 14px #14f4ff}
 .f-ps{border:var(--th) solid #0b2a6e;box-shadow:inset 0 0 0 3px #4d8dff}
 .f-ps i{display:block;font-weight:700}.f-ps i:nth-child(1){color:#3ddc84}.f-ps i:nth-child(2){color:#ff4d5e}.f-ps i:nth-child(3){color:#4d8dff}.f-ps i:nth-child(4){color:#ff7fd1}
-.f-crt{border:var(--th) solid #121212;border-radius:6% / 9%;box-shadow:inset 0 0 90px 24px #000;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+.f-crt{border:var(--th) solid #121212;border-radius:6% / 9%;box-shadow:inset 0 0 90px 24px #000;background:#0a0a0a}
 .frimg{position:absolute;inset:0;width:100%;height:100%;display:none;pointer-events:none}
-.f-crates{border:var(--th) solid transparent;border-image:repeating-linear-gradient(45deg,#f5c400 0 12px,#1a1a1a 12px 24px) 1;box-shadow:inset 0 0 0 3px #1a1a1a}
-.f-mech{border:var(--th) solid #3a4f63;box-shadow:inset 0 0 0 3px #19e3ff,inset 0 0 0 6px #0d141c}
-.f-heist{border:var(--th) solid #17261b;box-shadow:inset 0 0 0 3px #3fae55,inset 0 0 0 6px #0b130d}
-.f-heist i:nth-child(2){transform:scaleX(-1)}.f-heist i:nth-child(-n+2){width:calc(var(--th)*3.6 + 52px)}
-.f-crates i,.f-mech i,.f-heist i{display:block;width:calc(var(--th)*2.4 + 34px);height:calc(var(--th)*2.4 + 34px);font-size:0}.fr i svg{width:100%;height:100%;display:block}
-.f-mech i:nth-child(2),.f-crates i:nth-child(2){transform:scaleX(-1)}.f-mech i:nth-child(3){transform:scaleY(-1)}.f-mech i:nth-child(4){transform:scale(-1,-1)}
-.sw{position:absolute;top:7%;bottom:7%;width:8.5%;display:none}.sw svg{width:100%;height:100%}.sw.l{left:.6%;transform:rotate(-4deg)}.sw.r{right:.6%;transform:scaleX(-1) rotate(-4deg)}
-.f-swords{border:var(--th) solid #2a1208;box-shadow:inset 0 0 0 2px #ffb15a}.f-swords .sw{display:block}
 body.fs:not(.showfr) .fr,body.fs:not(.showfr) .frimg{display:none!important}body.fs:not(.showfr) .vid{inset:0!important;left:0!important;top:0!important;width:100%!important;height:100%!important}
 body.fs .stage{position:fixed;inset:0;max-width:none;width:100vw;height:100vh;aspect-ratio:auto;margin:0;border-radius:0;z-index:99}
 </style></head><body>
+<div id="veil"></div>
 <div id="app">
 <aside><div class="logo">NitroPlay</div><nav>
 <button data-t="inicio">Inicio</button><button data-t="cuenta">Cuenta PSN</button><button data-t="consola">Consola</button><button data-t="temas">Temas</button><button data-t="marcos">Marcos</button><button data-t="calidad">HDR y calidad</button>
@@ -81,12 +75,14 @@ body.fs .stage{position:fixed;inset:0;max-width:none;width:100vw;height:100vh;as
 <div class="card"><p>Imágenes tuyas: JPG, PNG, WebP, GIF, MP4 o WebM.</p><button class="p" onclick="send('open:fondos')">Abrir mi carpeta de fondos</button></div>
 <div id="grid"><p class="small" id="vacio">Todavía no tienes fondos. Importa imágenes o busca un juego.</p></div></section>
 
-<section id="marcos"><h1>Marcos y pantalla completa</h1><p>Un marco alrededor del juego. Elige uno de los incluidos o crea el tuyo con las imágenes de tus juegos de PlayStation (Kratos, Horizon...).</p>
-<div class="stage" id="stage"><div class="vid" id="vid"><b>Vista previa</b><span class="small" id="vq"></span></div><img id="frimg" class="frimg" alt=""><div class="fr" id="fr"><i></i><i></i><i></i><i></i><div class="sw l"></div><div class="sw r"></div></div></div>
+<section id="marcos"><h1>Marcos y pantalla completa</h1><p>Un marco alrededor del juego. Elige uno de los incluidos o importa un pack propio en formato .zip.</p>
+<div class="stage" id="stage"><div class="vid" id="vid"><b>Vista previa</b><span class="small" id="vq"></span></div><img id="frimg" class="frimg" alt=""><div class="fr" id="fr"><i></i><i></i><i></i><i></i></div></div>
 <div class="fila"><button class="p" onclick="send('fs')">Pantalla completa (F11)</button><button class="p" onclick="toggleFrame()" id="ftog">Marco: sí (F9)</button><label>Grosor <input type="range" id="fth" min="0" max="40" oninput="setTh(this.value)" onchange="send('frame-th:'+this.value)"></label></div>
 <div class="chips" id="flist"></div>
-<div class="card"><b>Tus propios marcos</b><p>Crea una carpeta por marco dentro de la carpeta de marcos con un <code>frame.png</code> (PNG con transparencia en el centro) y, si quieres, un <code>theme.json</code>:</p><p><code>{"name":"Mi marco","system":"ps5","viewport_rect":{"x":6,"y":8,"w":88,"h":84}}</code></p><p class="small">El rectángulo indica dónde va el vídeo (en % del marco). El campo <code>system</code> permite packs para otras consolas en el futuro. Usa imágenes tuyas o con permiso: NitroPlay no incluye arte oficial de juegos.</p>
-<button class="p" onclick="send('open:marcos')">Abrir carpeta de marcos</button> <button class="p" onclick="send('packs')">Recargar</button></div></section>
+<div class="card"><b>Importar pack (.zip)</b><p>Elige un pack con <code>catalog.json</code> y carpetas <code>temas/&lt;id&gt;/</code> con <code>theme.json</code>, <code>frame.png</code> y, si quieres, <code>wallpaper</code>. Los temas se instalan en tu carpeta de NitroPlay; los que no cumplan el formato se descartan y se indica por qué.</p>
+<button class="p" onclick="send('import-zip')">Importar pack (.zip)</button> <p class="small" id="impMsg"></p></div>
+<div class="card"><b>Carpeta de packs</b><p class="small">Aquí ves los packs instalados. Recargar vuelve a leer la lista.</p>
+<button class="p" onclick="send('open:marcos')">Abrir carpeta de packs</button> <button class="p" onclick="send('packs')">Recargar</button></div></section>
 
 <section id="calidad"><h1>Calidad de transmisión</h1><p>Se guarda y se aplica a la próxima transmisión.</p>
 <div class="card"><div class="fila">
@@ -102,18 +98,21 @@ body.fs .stage{position:fixed;inset:0;max-width:none;width:100vw;height:100vh;as
 </main></div>
 <script>
 var STATE={bg:"__BG__",theme:"__THEME__",quality:__QUALITY__,frame:__FRAME__,account:"__ACCOUNT__",tab:"__TAB__",error:"__ERROR__"};
-var T=[["nitroplay","NitroPlay","Original","#0f1424","#3d7bff","#6ea8ff"]];
+var T=[["nitroplay","NitroPlay","Predeterminado","#0f1424","#3d7bff","#6ea8ff"]];
 function $(i){return document.getElementById(i)}
 function send(m){try{window.ipc.postMessage(m)}catch(e){}}
-function applyTheme(id){var t=T.filter(function(x){return x[0]==id})[0]||T[T.length-1];var r=document.documentElement.style;r.setProperty("--c1",t[3]);r.setProperty("--c2",t[4]);r.setProperty("--c3",t[5]);STATE.theme=t[0];$("temaTxt").textContent=t[1]+" ("+t[2]+")";var a=document.querySelectorAll(".t");for(var i=0;i<a.length;i++)a[i].className="t"+(a[i].getAttribute("data-id")==t[0]?" on":"")}
+function themeEntry(){return T.filter(function(x){return x[0]==STATE.theme})[0]||T[T.length-1]}
+function setAcc(c){document.documentElement.style.setProperty("--acc",c)}
+function applyTheme(id){var t=T.filter(function(x){return x[0]==id})[0]||T[T.length-1];var r=document.documentElement.style;r.setProperty("--c1",t[3]);r.setProperty("--c2",t[4]);r.setProperty("--c3",t[5]);STATE.theme=t[0];setAcc(t[4]);$("temaTxt").textContent=t[1]+" ("+t[2]+")";var a=document.querySelectorAll(".t");for(var i=0;i<a.length;i++)a[i].className="t"+(a[i].getAttribute("data-id")==t[0]?" on":"")}
 function pick(id){applyTheme(id);send("theme:"+id)}
 function go(t){STATE.tab=t;var s=document.querySelectorAll("section");for(var i=0;i<s.length;i++)s[i].className=(s[i].id==t?"on":"");var b=document.querySelectorAll("nav button");for(var j=0;j<b.length;j++)b[j].className=(b[j].getAttribute("data-t")==t?"on":"")}
 function login(){send("login")}
 window.link=function(ip,kind){var v=$("pin").value,t=$("pinTxt");if(v.length!=8){t.textContent="Escribe primero el PIN de 8 dígitos.";return}t.textContent="Vinculando con "+ip+"...";send("reg:"+ip+"|"+kind+"|"+v)};
 window.regDone=function(ok,msg){$("pinTxt").textContent=msg;if(ok)$("pin").value=""};
+window.importDone=function(ok,msg){$("impMsg").textContent=msg;if(ok)send("packs")};
 function scan(){$("scanTxt").textContent="Buscando consolas (unos 4 segundos)...";send("scan")}
 function showConsoles(a){var t=$("scanTxt"),l=$("cl"),h="";if(!a.length){t.textContent="No encontré consolas. Comprueba que está encendida (o en reposo) y en la misma red.";l.innerHTML="";return}t.textContent="Encontradas: "+a.length+".";for(var i=0;i<a.length;i++){var k=/PS5/i.test(a[i].t)?"ps5":"ps4";h+="<div class=\"card\"><b>"+(a[i].n||"Consola")+"</b> <span class=\"badge\">"+a[i].t+"</span> <span class=\"badge\">"+a[i].s+"</span><p>Dirección: <code>"+a[i].ip+"</code></p><button class=\"p\" onclick=\"link('"+a[i].ip+"','"+k+"')\">Vincular</button></div>"}l.innerHTML=h}
-function applyBg(d){var b=document.body.style;if(d){b.backgroundImage="linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url("+d+")";b.backgroundSize="cover";b.backgroundPosition="center"}else{b.backgroundImage="";b.backgroundSize=""}}
+function applyBg(d){var b=document.body.style;if(d){b.backgroundImage="url("+d+")";b.backgroundSize="cover";b.backgroundPosition="center";$("veil").style.display="block"}else{b.backgroundImage="";b.backgroundSize="";$("veil").style.display="none"}}
 function setBg(f){if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,1920/im.width),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);var d=c.toDataURL("image/jpeg",0.85);applyBg(d);send("bg:"+d)};im.src=r.result};r.readAsDataURL(f)}
 function clearBg(){applyBg("");send("bg-clear")}
 function copyId(){var r=document.createRange();r.selectNode($("idVal"));var s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand("copy");$("cp").textContent="Copiado"}
@@ -134,19 +133,23 @@ if(STATE.error&&STATE.error.charAt(0)!="_"){var e=$("err");e.style.display="bloc
 if(STATE.bg&&STATE.bg.charAt(0)!="_")applyBg(STATE.bg);applyTheme(STATE.theme);go(STATE.tab);
 })();
 
-var BF=[["none","Sin marco"],["fire","Nórdico / Fuego"],["neon","Neón Cyberpunk"],["ps","PlayStation Clásico"],["crt","Retro CRT"],["swords","Espadas gemelas"],["crates","Cajas de peligro"],["mech","Máquina cibernética"],["heist","Atraco"]],PK=[];
-var SWORD='<svg viewBox="0 0 40 200" xmlns="http://www.w3.org/2000/svg"><polygon points="20,3 27,32 25.5,128 20,136 14.5,128 13,32" fill="#e8eef5" stroke="#1f2833" stroke-width="1.4"/><polygon points="20,3 27,32 25.5,128 20,136" fill="#9fb0c3"/><line x1="20" y1="22" x2="20" y2="122" stroke="#3a4a5e" stroke-width="1.6"/><path d="M20 40l2.2 4-2.2 4-2.2-4z M20 62l2.2 4-2.2 4-2.2-4z M20 84l2.2 4-2.2 4-2.2-4z" fill="#ff7a1a"/><path d="M3 126q8 4 17 8q9-4 17-8l-3 14q-7-3-14-4q-7 1-14 4z" fill="#b8741c" stroke="#3a2008" stroke-width="1"/><rect x="17.5" y="138" width="5" height="34" rx="2" fill="#5b2a14" stroke="#2a1208"/><path d="M18 144h4M18 150h4M18 156h4M18 162h4" stroke="#c98a3a" stroke-width="1"/><circle cx="20" cy="180" r="7" fill="#b8741c" stroke="#3a2008" stroke-width="1.2"/><circle cx="20" cy="180" r="2.6" fill="#ff7a1a"/></svg>';
-var CORN={crates:'<svg viewBox="0 0 48 48"><rect x="2" y="2" width="44" height="44" fill="#c8883a" stroke="#4a2a0a" stroke-width="3"/><path d="M2 2L46 46M46 2L2 46" stroke="#4a2a0a" stroke-width="3"/><rect x="2" y="18" width="44" height="12" fill="#f5c400" stroke="#1a1a1a" stroke-width="2"/><circle cx="24" cy="24" r="4.5" fill="#1a1a1a"/><path d="M24 19.5v-4" stroke="#1a1a1a" stroke-width="2"/></svg>',heist_P:'<svg viewBox="0 0 64 44"><path d="M2 6H50V18H36L32 22H26L30 42H14L12 20H2Z" fill="#7b8693" stroke="#10151a" stroke-width="3" stroke-linejoin="round"/><rect x="44" y="4" width="18" height="12" rx="2" fill="#a9b3bf" stroke="#10151a" stroke-width="3"/><circle cx="31" cy="12" r="7" fill="#c3ccd6" stroke="#10151a" stroke-width="3"/><circle cx="31" cy="12" r="2.4" fill="#10151a"/><path d="M14 24L17 38" stroke="#10151a" stroke-width="2.5"/></svg>',heist_B:'<svg viewBox="0 0 48 48"><path d="M17 4L20 11H28L31 4Q24 7 17 4Z" fill="#d9c27a" stroke="#1d2b1f" stroke-width="2"/><path d="M20 11Q4 22 6 38Q8 45 24 45Q40 45 42 38Q44 22 28 11Z" fill="#3fae55" stroke="#1d2b1f" stroke-width="2.5" stroke-linejoin="round"/><path d="M19 12H29" stroke="#1d2b1f" stroke-width="3"/><path d="M28 24H21Q18 24 18 27Q18 30 21 30H27Q30 30 30 33Q30 36 27 36H19M24 21V39" fill="none" stroke="#f4f1d0" stroke-width="3" stroke-linecap="round"/></svg>',mech:'<svg viewBox="0 0 60 60"><path d="M2 2H40L52 14V22H44V18L36 10H10V36H2Z" fill="#6f8aa6" stroke="#0d141c" stroke-width="2.5"/><path d="M6 6H38M6 6V32" stroke="#19e3ff" stroke-width="3"/><circle cx="21" cy="23" r="6" fill="#19e3ff" stroke="#0d141c" stroke-width="2"/><circle cx="21" cy="23" r="2" fill="#0d141c"/></svg>'};
+var BF=[["none","Sin marco"],["fire","Nórdico / Fuego"],["neon","Neón Cyberpunk"],["ps","PlayStation Clásico"],["crt","Retro CRT"]],PK=[];
 var SYM={ps:["△","○","✕","□"],fire:["ᚦ","ᛉ","ᛟ","ᚱ"]};
 function drawFl(){var h="",i,a=BF.concat(PK.map(function(p){return[p.id,p.n+" ("+p.s+")"]}));for(i=0;i<a.length;i++)h+='<button class="chip'+(STATE.frame.id==a[i][0]?" on":"")+'" data-f="'+a[i][0]+'" onclick="pickFrame(this.getAttribute(\'data-f\'))">'+a[i][1]+'</button>';$("flist").innerHTML=h}
 function setTh(v){STATE.frame.th=+v;document.documentElement.style.setProperty("--th",v+"px")}
-function applyFrame(){var sw=document.querySelectorAll(".sw");for(var k=0;k<sw.length;k++)if(!sw[k].firstChild)sw[k].innerHTML=SWORD;var f=STATE.frame,fr=$("fr"),im=$("frimg"),vd=$("vid"),user=f.id.indexOf("u-")==0,p=null,i;
-if(user)for(i=0;i<PK.length;i++)if(PK[i].id==f.id)p=PK[i];
+function themeAcc(){return themeEntry()[4]}
+function applyFrame(){
+var f=STATE.frame,fr=$("fr"),im=$("frimg"),vd=$("vid"),user=f.id.indexOf("u-")==0,pk=null,i;
+if(user)for(i=0;i<PK.length;i++)if(PK[i].id==f.id)pk=PK[i];
+setAcc(pk&&pk.ac?pk.ac:themeAcc());
+var p=pk;
 if(p&&!p.img){if(!p.ask){p.ask=1;send("pack:"+p.id)}p=null}
 var show=f.on&&f.id!="none"&&(!user||p);
-fr.className="fr "+(show&&!user?"on f-"+f.id:"");im.style.display=show&&user?"block":"none";
-var sy=SYM[f.id]||["","","",""],c=fr.children;for(i=0;i<4;i++){if(f.id=="heist")c[i].innerHTML=i<2?CORN.heist_P:CORN.heist_B;else if(CORN[f.id])c[i].innerHTML=CORN[f.id];else c[i].textContent=sy[i]}
-if(show&&user){im.src=p.img;vd.style.cssText="inset:auto;left:"+p.vx+"%;top:"+p.vy+"%;width:"+p.vw+"%;height:"+p.vh+"%"}else vd.style.cssText=(show&&f.id=="swords")?"inset:0 9.5%":"";
+fr.className="fr "+(show&&!user?"on f-"+f.id:"");
+im.style.display=show&&user?"block":"none";
+var sy=SYM[f.id]||["","","",""],c=fr.children;
+for(i=0;i<4;i++)c[i].textContent=sy[i];
+if(show&&user){im.src=p.img;vd.style.cssText="inset:auto;left:"+p.vx+"%;top:"+p.vy+"%;width:"+p.vw+"%;height:"+p.vh+"%"}else vd.style.cssText="";
 $("ftog").textContent="Marco: "+(f.on?"sí":"no")+" (F9)";$("fth").value=f.th;setTh(f.th);drawFl()}
 function pickFrame(id){STATE.frame.id=id;applyFrame();send("frame:"+id)}
 function toggleFrame(){STATE.frame.on=!STATE.frame.on;applyFrame();send("frame-on:"+(STATE.frame.on?1:0))}

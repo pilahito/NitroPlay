@@ -7,6 +7,7 @@ use psn_account::{
     account_id_base64, basic_auth_header, code_from_redirect_url, login_url, parse_access_token,
     parse_user_id, token_body, REDIRECT_URI, TOKEN_URL,
 };
+use nitroplay_core::pack::{import_zip, validate_theme, ThemeJson};
 use std::path::PathBuf;
 use tao::{
     event::{Event, WindowEvent},
@@ -27,10 +28,11 @@ enum UiEvent {
     Fs,
     Packs(String),
     PackImg(String),
+    Imported(Result<String, String>),
 }
 
 /// Marcos incluidos (dibujados por NitroPlay, sin arte de terceros). Los packs del usuario llevan prefijo `u-`.
-const BUILTIN_FRAMES: [&str; 9] = ["none", "fire", "neon", "ps", "crt", "swords", "crates", "mech", "heist"];
+const BUILTIN_FRAMES: [&str; 5] = ["none", "fire", "neon", "ps", "crt"];
 
 fn valid_frame(id: &str) -> bool {
     BUILTIN_FRAMES.contains(&id) || id.strip_prefix("u-").map(nitroplay_core::theme_pack::valid_pack_id).unwrap_or(false)
@@ -42,24 +44,32 @@ fn pack_image_args(frame_id: &str) -> Option<String> {
     if !nitroplay_core::theme_pack::valid_pack_id(id) {
         return None;
     }
-    let png = std::fs::read(frames_dir()?.join(id).join("frame.png")).ok()?;
+    let png = std::fs::read(packs_dir()?.join(id).join("frame.png")).ok()?;
     if png.len() > 6_000_000 || !png.starts_with(&[0x89, b'P', b'N', b'G']) {
         return None;
     }
     Some(format!("\"{frame_id}\",\"data:image/png;base64,{}\"", nitroplay_core::regist_payload::base64_encode(&png)))
 }
 
-/// Carpeta de marcos del usuario: %APPDATA%\NitroPlay\marcos\<pack>\{frame.png, theme.json}
-fn frames_dir() -> Option<PathBuf> {
-    let dir = PathBuf::from(std::env::var_os("APPDATA")?).join("NitroPlay").join("marcos");
+/// Carpeta de datos de NitroPlay: %APPDATA%\NitroPlay (se crea si no existe).
+fn nitro_dir() -> Option<PathBuf> {
+    let dir = PathBuf::from(std::env::var_os("APPDATA")?).join("NitroPlay");
     std::fs::create_dir_all(&dir).ok()?;
     Some(dir)
 }
 
-/// Lee los packs del usuario y devuelve un array JSON con sus datos (sin imagen; se pide aparte con `pack:<id>`). Max 60 packs.
+/// Packs importados: %APPDATA%\NitroPlay\temas\<id>\{theme.json, frame.png, wallpaper.*}
+fn packs_dir() -> Option<PathBuf> {
+    let dir = nitro_dir()?.join("temas");
+    std::fs::create_dir_all(&dir).ok()?;
+    Some(dir)
+}
+
+/// Lee los packs importados y devuelve un array JSON con sus datos (sin imagen; se pide aparte con `pack:<id>`).
+/// Solo entran packs que pasan `validate_theme`. Max 60 packs. Porcentajes del viewport en 0..100.
 fn scan_packs() -> String {
     let mut items: Vec<String> = Vec::new();
-    let Some(dir) = frames_dir() else { return "[]".into() };
+    let Some(dir) = packs_dir() else { return "[]".into() };
     let mut entries: Vec<_> = std::fs::read_dir(dir).map(|r| r.flatten().collect()).unwrap_or_default();
     entries.sort_by_key(|e| e.file_name());
     for e in entries {
@@ -71,13 +81,39 @@ fn scan_packs() -> String {
             continue;
         }
         let json = std::fs::read_to_string(e.path().join("theme.json")).unwrap_or_default();
-        let m = nitroplay_core::theme_pack::parse_theme_json(&json, &id);
+        let Ok(t) = serde_json::from_str::<ThemeJson>(&json) else { continue };
+        let Ok(m) = validate_theme(&t) else { continue };
+        let accent = m.accent_rgb.map(|c| format!("#{:02x}{:02x}{:02x}", c[0], c[1], c[2])).unwrap_or_default();
+        let (x, y, w, h) = m
+            .viewport
+            .map(|v| (v.x * 100.0, v.y * 100.0, v.w * 100.0, v.h * 100.0))
+            .unwrap_or((0.0, 0.0, 100.0, 100.0));
         items.push(format!(
-            "{{\"id\":\"u-{id}\",\"n\":\"{}\",\"s\":\"{}\",\"vx\":{},\"vy\":{},\"vw\":{},\"vh\":{}}}",
-            m.name, m.system, m.viewport.x, m.viewport.y, m.viewport.w, m.viewport.h
+            "{{\"id\":\"u-{id}\",\"n\":\"{}\",\"s\":\"{}\",\"ac\":\"{accent}\",\"vx\":{x},\"vy\":{y},\"vw\":{w},\"vh\":{h}}}",
+            m.name, m.system
         ));
     }
     format!("[{}]", items.join(","))
+}
+
+/// Abre el selector de archivos, instala el pack .zip en %APPDATA%\NitroPlay\temas y devuelve un resumen.
+fn import_pack_zip() -> Result<String, String> {
+    let Some(path) = rfd::FileDialog::new().add_filter("Pack de NitroPlay (.zip)", &["zip"]).pick_file() else {
+        return Err("Importación cancelada.".into());
+    };
+    let root = nitro_dir().ok_or("No se encuentra la carpeta de datos de NitroPlay.")?;
+    let file = std::fs::File::open(&path).map_err(|e| format!("No se pudo abrir el zip: {e}"))?;
+    let report = import_zip(file, &root)?;
+    let mut txt = format!("Temas nuevos: {}. Fondos añadidos: {}.", report.imported.len(), report.merged_wallpaper.len());
+    if !report.skipped.is_empty() {
+        let motivos: Vec<String> = report.skipped.iter().map(|(id, m)| format!("{id}: {m}")).collect();
+        txt.push_str(&format!(" Descartados: {}. {}", report.skipped.len(), motivos.join("; ")));
+    }
+    if report.imported.is_empty() && report.merged_wallpaper.is_empty() {
+        Err(txt)
+    } else {
+        Ok(txt)
+    }
 }
 
 // ---- configuracion en %APPDATA%\NitroPlay\config.txt (lineas clave=valor) ----
@@ -395,6 +431,11 @@ fn main() {
                 std::thread::spawn(move || {
                     let _ = p.send_event(UiEvent::Packs(scan_packs()));
                 });
+            } else if msg == "import-zip" {
+                let p = ipc_proxy.clone();
+                std::thread::spawn(move || {
+                    let _ = p.send_event(UiEvent::Imported(import_pack_zip()));
+                });
             } else if let Some(id) = msg.strip_prefix("pack:") {
                 if valid_frame(id) {
                     let (p, id) = (ipc_proxy.clone(), id.to_string());
@@ -405,7 +446,7 @@ fn main() {
                     });
                 }
             } else if msg == "open:marcos" {
-                if let Some(dir) = frames_dir() {
+                if let Some(dir) = packs_dir() {
                     let _ = std::process::Command::new("explorer").arg(dir).spawn();
                 }
             } else if let Some(id) = msg.strip_prefix("frame:") {
@@ -463,6 +504,10 @@ fn main() {
             }
             Event::UserEvent(UiEvent::Packs(j)) => {
                 let _ = webview.evaluate_script(&format!("showPacks({j})"));
+            }
+            Event::UserEvent(UiEvent::Imported(r)) => {
+                let (ok, txt) = match r { Ok(t) => (true, t), Err(t) => (false, t) };
+                let _ = webview.evaluate_script(&format!("importDone({ok},\"{}\")", js_str(&txt)));
             }
             Event::UserEvent(UiEvent::Reg(r)) => {
                 let (ok, txt) = match r { Ok(n) => (true, format!("Consola vinculada: {n}")), Err(e) => (false, e) };
