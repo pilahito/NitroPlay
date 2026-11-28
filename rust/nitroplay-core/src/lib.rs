@@ -13,5 +13,7 @@ pub mod regist_payload;
 pub mod rpcrypt;
 #[allow(clippy::all)]
 mod rpcrypt_tables;
+pub mod net;
 pub mod session;
-pub mod theme_pack;
+pub mod updater;
+pub mod wallpapers;

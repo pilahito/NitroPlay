@@ -35,13 +35,13 @@ enum UiEvent {
 const BUILTIN_FRAMES: [&str; 5] = ["none", "fire", "neon", "ps", "crt"];
 
 fn valid_frame(id: &str) -> bool {
-    BUILTIN_FRAMES.contains(&id) || id.strip_prefix("u-").map(nitroplay_core::theme_pack::valid_pack_id).unwrap_or(false)
+    BUILTIN_FRAMES.contains(&id) || id.strip_prefix("u-").map(nitroplay_core::pack::valid_pack_id).unwrap_or(false)
 }
 
 /// PNG de un pack (max 6 MB, firma PNG comprobada) como cadena `"id","data:image/png;base64,..."` para JS.
 fn pack_image_args(frame_id: &str) -> Option<String> {
     let id = frame_id.strip_prefix("u-")?;
-    if !nitroplay_core::theme_pack::valid_pack_id(id) {
+    if !nitroplay_core::pack::valid_pack_id(id) {
         return None;
     }
     let png = std::fs::read(packs_dir()?.join(id).join("frame.png")).ok()?;
@@ -74,7 +74,7 @@ fn scan_packs() -> String {
     entries.sort_by_key(|e| e.file_name());
     for e in entries {
         let id = e.file_name().to_string_lossy().to_string();
-        if !nitroplay_core::theme_pack::valid_pack_id(&id) || !e.path().is_dir() || items.len() >= 60 {
+        if !nitroplay_core::pack::valid_pack_id(&id) || !e.path().is_dir() || items.len() >= 60 {
             continue;
         }
         if !e.path().join("frame.png").is_file() {

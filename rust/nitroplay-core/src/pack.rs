@@ -15,7 +15,10 @@ use std::{
     path::Path,
 };
 
-use crate::theme_pack::valid_pack_id;
+/// El id de un pack es el nombre de su carpeta: solo letras, numeros, `-` y `_` (maximo 40).
+pub fn valid_pack_id(id: &str) -> bool {
+    !id.is_empty() && id.len() <= 40 && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+}
 
 /// Limites para no dejarse engañar por un zip malicioso (bombas de descompresion, miles de entradas).
 const MAX_JSON_BYTES: u64 = 64 * 1024;
