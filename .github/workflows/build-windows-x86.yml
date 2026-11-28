@@ -22,6 +22,8 @@ jobs:
       # CMake 4 quitó la compatibilidad < 3.5 y json-c (vcpkg) aún la pide
       CMAKE_POLICY_VERSION_MINIMUM: "3.5"
       VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}\ci-triplets
+      # caché de paquetes ya compilados de vcpkg (antes ~27 min por build)
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg_bincache
 
     defaults:
       run:
@@ -135,6 +137,17 @@ jobs:
       - name: Make build directory
         run: |
           mkdir build
+
+      - name: Preparar caché de vcpkg
+        run: New-Item -ItemType Directory -Force "${{ github.workspace }}\vcpkg_bincache" | Out-Null
+
+      - name: Restaurar caché de vcpkg
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}\vcpkg_bincache
+          key: vcpkg-bin-${{ env.triplet }}-${{ env.vcpkg_baseline }}-${{ hashFiles('vcpkg.json', 'ci-triplets/**') }}
+          restore-keys: |
+            vcpkg-bin-${{ env.triplet }}-${{ env.vcpkg_baseline }}-
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
