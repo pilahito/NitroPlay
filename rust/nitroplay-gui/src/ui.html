@@ -19,17 +19,39 @@ button.p:hover{filter:brightness(1.15)}
 code,.id{font-family:Consolas,monospace}.id{font-size:26px;letter-spacing:2px;background:rgba(0,0,0,.4);padding:10px 14px;border-radius:9px;display:inline-block;margin:8px 0;user-select:all}
 .err{background:#5b1a1a;border:1px solid #b44;padding:10px 14px;border-radius:9px;max-width:640px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-top:14px}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chip{background:rgba(255,255,255,.1);color:#fff;border:0;border-radius:99px;padding:7px 16px;cursor:pointer;font-size:13px}.chip.on{background:var(--c2)}
+.fila{display:flex;gap:14px;flex-wrap:wrap;align-items:center}.fila label{display:flex;flex-direction:column;gap:4px;font-size:13px}.small{font-size:12px;opacity:.75}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chip{background:rgba(255,255,255,.1);color:#fff;border:0;border-radius:99px;padding:7px 16px;cursor:pointer;font-size:13px}.chip.on{background:var(--c2)}
 .pv{height:96px;border-radius:9px 9px 0 0;position:relative;overflow:hidden}.pv i{position:absolute;left:0;top:0;bottom:0;width:26%;background:rgba(0,0,0,.45)}.pv b{position:absolute;left:32%;top:14px;width:46%;height:9px;border-radius:5px;background:rgba(255,255,255,.85)}.pv u{position:absolute;left:32%;top:34px;width:30%;height:22px;border-radius:6px;background:var(--pc)}
 .tn{padding:9px 12px;background:rgba(0,0,0,.55);border-radius:0 0 9px 9px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center}.tn small{font-weight:400;opacity:.7}
 .tick{display:none;background:#fff;color:#000;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:700}.t.on .tick{display:inline-block}
 .t{border-radius:12px;cursor:pointer;border:3px solid transparent;transition:transform .12s}
 .t small{font-weight:400;opacity:.8}.t.on{border-color:#fff}.t:hover{transform:translateY(-2px)}
 .badge{display:inline-block;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.12);font-size:12px;margin-left:8px}
+.stage{position:relative;width:100%;max-width:760px;aspect-ratio:16/9;background:#05070d;border-radius:12px;overflow:hidden;margin:12px 0}
+.vid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,#1b2a52,#05070d);color:#9fb4ff;text-align:center}
+.fr{position:absolute;inset:0;pointer-events:none;display:none}.fr.on{display:block}
+.fr i{position:absolute;font-style:normal;font-size:calc(var(--th)*1.6 + 10px);display:none}
+.fr i:nth-child(1){left:1.2%;top:1%}.fr i:nth-child(2){right:1.2%;top:1%}.fr i:nth-child(3){left:1.2%;bottom:1%}.fr i:nth-child(4){right:1.2%;bottom:1%}
+.f-fire{border:var(--th) solid #b3260e;border-image:linear-gradient(135deg,#ffb347,#ff4500 40%,#7a0000) 1;box-shadow:inset 0 0 40px #ff450099,inset 0 0 8px #ffd27a}
+.f-fire i{display:block;color:#ffb347;text-shadow:0 0 8px #ff4500}
+.f-neon{border:var(--th) solid #14f4ff;box-shadow:inset 0 0 22px #14f4ff,inset 0 0 50px #ff2bd666,0 0 14px #14f4ff}
+.f-ps{border:var(--th) solid #0b2a6e;box-shadow:inset 0 0 0 3px #4d8dff}
+.f-ps i{display:block;font-weight:700}.f-ps i:nth-child(1){color:#3ddc84}.f-ps i:nth-child(2){color:#ff4d5e}.f-ps i:nth-child(3){color:#4d8dff}.f-ps i:nth-child(4){color:#ff7fd1}
+.f-crt{border:var(--th) solid #121212;border-radius:6% / 9%;box-shadow:inset 0 0 90px 24px #000;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+.frimg{position:absolute;inset:0;width:100%;height:100%;display:none;pointer-events:none}
+.f-crates{border:var(--th) solid transparent;border-image:repeating-linear-gradient(45deg,#f5c400 0 12px,#1a1a1a 12px 24px) 1;box-shadow:inset 0 0 0 3px #1a1a1a}
+.f-mech{border:var(--th) solid #3a4f63;box-shadow:inset 0 0 0 3px #19e3ff,inset 0 0 0 6px #0d141c}
+.f-heist{border:var(--th) solid #17261b;box-shadow:inset 0 0 0 3px #3fae55,inset 0 0 0 6px #0b130d}
+.f-heist i:nth-child(2){transform:scaleX(-1)}.f-heist i:nth-child(-n+2){width:calc(var(--th)*3.6 + 52px)}
+.f-crates i,.f-mech i,.f-heist i{display:block;width:calc(var(--th)*2.4 + 34px);height:calc(var(--th)*2.4 + 34px);font-size:0}.fr i svg{width:100%;height:100%;display:block}
+.f-mech i:nth-child(2),.f-crates i:nth-child(2){transform:scaleX(-1)}.f-mech i:nth-child(3){transform:scaleY(-1)}.f-mech i:nth-child(4){transform:scale(-1,-1)}
+.sw{position:absolute;top:7%;bottom:7%;width:8.5%;display:none}.sw svg{width:100%;height:100%}.sw.l{left:.6%;transform:rotate(-4deg)}.sw.r{right:.6%;transform:scaleX(-1) rotate(-4deg)}
+.f-swords{border:var(--th) solid #2a1208;box-shadow:inset 0 0 0 2px #ffb15a}.f-swords .sw{display:block}
+body.fs:not(.showfr) .fr,body.fs:not(.showfr) .frimg{display:none!important}body.fs:not(.showfr) .vid{inset:0!important;left:0!important;top:0!important;width:100%!important;height:100%!important}
+body.fs .stage{position:fixed;inset:0;max-width:none;width:100vw;height:100vh;aspect-ratio:auto;margin:0;border-radius:0;z-index:99}
 </style></head><body>
 <div id="app">
 <aside><div class="logo">NitroPlay</div><nav>
-<button data-t="inicio">Inicio</button><button data-t="cuenta">Cuenta PSN</button><button data-t="consola">Consola</button><button data-t="temas">Temas</button><button data-t="calidad">HDR y calidad</button>
+<button data-t="inicio">Inicio</button><button data-t="cuenta">Cuenta PSN</button><button data-t="consola">Consola</button><button data-t="temas">Temas</button><button data-t="marcos">Marcos</button><button data-t="calidad">HDR y calidad</button>
 </nav></aside>
 <main>
 <div id="err" class="err" style="display:none"></div>
@@ -44,53 +66,66 @@ code,.id{font-family:Consolas,monospace}.id{font-size:26px;letter-spacing:2px;ba
 <button class="p" onclick="login()" id="loginBtn">Iniciar sesión con PSN</button></div></section>
 
 <section id="consola"><h1>Consola</h1>
-<div class="card"><b>Para vincular tu PS4/PS5</b><ol>
-<li>En la PS5: Ajustes → Sistema → Remote Play → Vincular dispositivo. Anota el PIN de 8 dígitos (caduca en minutos).</li>
-<li>Ten a mano tu Account-ID (pestaña Cuenta PSN).</li>
-<li>El registro y la transmisión los hace el cliente NitroPlay de transmisión (Android/escritorio), no esta ventana.</li></ol></div>
-<div class="card"><b>Código PIN de la PS5</b><p>Escribe aquí el PIN de 8 dígitos que te muestra la consola (Ajustes → Sistema → Uso a distancia → Vincular dispositivo).</p><input id="pin" inputmode="numeric" maxlength="8" placeholder="00000000" oninput="this.value=this.value.replace(/\D/g,'')" style="font:26px Consolas,monospace;letter-spacing:6px;width:230px;padding:8px 12px;border-radius:9px;border:1px solid #fff4;background:#0006;color:#fff"> <button class="p" onclick="pinGo()">Vincular</button><p id="pinTxt"></p></div>
+<div class="card"><b>Vincular tu PS4/PS5</b><ol>
+<li>En la PS5: Ajustes → Sistema → Uso a distancia → Vincular dispositivo. Anota el PIN de 8 dígitos (caduca en minutos) y deja esa pantalla abierta.</li>
+<li>Inicia sesión con PSN en la pestaña Cuenta PSN.</li>
+<li>Busca la consola, escribe el PIN y pulsa Vincular.</li></ol>
+<input id="pin" inputmode="numeric" maxlength="8" placeholder="00000000" oninput="this.value=this.value.replace(/\D/g,'')" style="font:26px Consolas,monospace;letter-spacing:6px;width:230px;padding:8px 12px;border-radius:9px;border:1px solid #fff4;background:#0006;color:#fff"><p id="pinTxt" class="small"></p></div>
 <div class="card"><b>Consolas en tu red</b><p id="scanTxt">Pulsa buscar con la consola encendida y en la misma red.</p><button class="p" onclick="scan()">Buscar consolas</button><div id="cl"></div></div></section>
 
-<section id="temas"><h1>Temas</h1><p>Elige un estilo; se guarda para el próximo inicio. <span class="badge" id="cnt"></span></p><div class="card"><b>Fondo propio</b><p>Pon la imagen de cada juego como fondo del tema que tengas elegido: se guarda para ese tema y vuelve sola al elegirlo. Usa imágenes que hayas descargado tú para uso personal.</p>
-<input type="file" id="bgFile" accept="image/*" style="display:none" onchange="setBg(this.files[0])">
-<button class="p" onclick="document.getElementById('bgFile').click()">Elegir imagen</button>
-<button class="p" onclick="clearBg()">Quitar fondo de este tema</button>
-<button class="p" onclick="send('open:wallpapers')">Ver fondos oficiales de PlayStation</button></div>
-<div class="chips" id="chips"></div><div id="grid"></div></section>
+<section id="temas"><h1>Temas</h1><p>Fondos a pantalla completa con oscurecimiento. <span class="badge" id="cnt"></span></p>
+<div class="chips" id="chips"></div>
+<div class="card"><p>Busca el fondo de cualquier juego (PlayStation, retro, Nintendo) en SteamGridDB.</p>
+<div class="fila"><input id="sgq" placeholder="Nombre del juego" style="flex:1"><button class="p" onclick="sgSearch()">Buscar</button></div>
+<p class="small" id="sgMsg">La búsqueda usará tu clave gratuita de SteamGridDB. Todavía no está conectada.</p></div>
+<div class="card"><p>Imágenes tuyas: JPG, PNG, WebP, GIF, MP4 o WebM.</p><button class="p" onclick="send('open:fondos')">Abrir mi carpeta de fondos</button></div>
+<div id="grid"><p class="small" id="vacio">Todavía no tienes fondos. Importa imágenes o busca un juego.</p></div></section>
 
-<section id="calidad"><h1>HDR y alta calidad</h1>
-<div class="card"><b>Cómo activarlo en el cliente de transmisión</b><ul>
-<li>Configuración → Vídeo: selecciona <b>Vulkan</b>.</li>
-<li>Transmisión → PS5: selecciona <b>H265 HDR</b> (conexión local y, si hace falta, Internet).</li>
-<li>Nitidez ajustable en Configuración → Vídeo: Apagado, Baja, Media o Alta.</li>
-<li>Para ver HDR real, el monitor, Windows, el controlador y la salida de vídeo deben admitirlo.</li></ul>
-<p>Esta ventana no transmite vídeo: estos ajustes se aplican en el cliente de transmisión.</p></div></section>
+<section id="marcos"><h1>Marcos y pantalla completa</h1><p>Un marco alrededor del juego. Elige uno de los incluidos o crea el tuyo con las imágenes de tus juegos de PlayStation (Kratos, Horizon...).</p>
+<div class="stage" id="stage"><div class="vid" id="vid"><b>Vista previa</b><span class="small" id="vq"></span></div><img id="frimg" class="frimg" alt=""><div class="fr" id="fr"><i></i><i></i><i></i><i></i><div class="sw l"></div><div class="sw r"></div></div></div>
+<div class="fila"><button class="p" onclick="send('fs')">Pantalla completa (F11)</button><button class="p" onclick="toggleFrame()" id="ftog">Marco: sí (F9)</button><label>Grosor <input type="range" id="fth" min="0" max="40" oninput="setTh(this.value)" onchange="send('frame-th:'+this.value)"></label></div>
+<div class="chips" id="flist"></div>
+<div class="card"><b>Tus propios marcos</b><p>Crea una carpeta por marco dentro de la carpeta de marcos con un <code>frame.png</code> (PNG con transparencia en el centro) y, si quieres, un <code>theme.json</code>:</p><p><code>{"name":"Mi marco","system":"ps5","viewport_rect":{"x":6,"y":8,"w":88,"h":84}}</code></p><p class="small">El rectángulo indica dónde va el vídeo (en % del marco). El campo <code>system</code> permite packs para otras consolas en el futuro. Usa imágenes tuyas o con permiso: NitroPlay no incluye arte oficial de juegos.</p>
+<button class="p" onclick="send('open:marcos')">Abrir carpeta de marcos</button> <button class="p" onclick="send('packs')">Recargar</button></div></section>
+
+<section id="calidad"><h1>Calidad de transmisión</h1><p>Se guarda y se aplica a la próxima transmisión.</p>
+<div class="card"><div class="fila">
+<label>Resolución <select id="q_res"><option value="720">720p</option><option value="1080">1080p</option></select></label>
+<label>FPS <select id="q_fps"><option value="30">30</option><option value="60">60</option></select></label>
+<label>Bitrate <select id="q_br"><option value="auto">Automático</option><option value="manual">Manual</option></select></label>
+<label>kbps (manual) <input id="q_kbps" type="number" min="1000" max="50000" style="width:110px"></label>
+<label>Códec <select id="q_codec"><option value="h264">H.264</option><option value="h265">H.265 (HEVC)</option></select></label>
+<label>API de vídeo <select id="q_api"><option value="auto">Automático</option><option value="vulkan">Vulkan</option><option value="d3d11">DirectX 11</option></select></label>
+<label>Nitidez <select id="q_sharp"><option value="0">Apagada</option><option value="1">Baja</option><option value="2">Media</option><option value="3">Alta</option></select></label>
+<label><input type="checkbox" id="q_hdr"> HDR (requiere H.265)</label></div>
+<p class="small" id="qMsg"></p><button class="p" onclick="saveQ()">Guardar ajustes</button></div></section>
 </main></div>
 <script>
-var STATE={bg:"__BG__",theme:"__THEME__",account:"__ACCOUNT__",tab:"__TAB__",error:"__ERROR__"};
-var T=[["ps5","PS5 clásico","Consola","#0b1020","#1d4ed8","#e5e7eb"],["ps4","PS4","Consola","#05122e","#0b3d91","#2f80ed"],["ps3","PlayStation 3","Consola","#0a0f1f","#1e3a8a","#94a3b8"],["ps2","PlayStation 2","Consola","#02060f","#0b2a5a","#4aa3ff"],["ps1","PlayStation 1 clásico","Consola","#202020","#6b7280","#d1d5db"],
-["spiderman","Marvel's Spider-Man","Juego","#0b0b1a","#c1121f","#1d4ed8"],["gow","God of War","Juego","#12090a","#7f1d1d","#d6d3d1"],["horizon","Horizon","Juego","#0b1b14","#d97706","#38bdf8"],["tlou","The Last of Us","Juego","#10140f","#4d7c0f","#a16207"],["ghost","Ghost of Tsushima","Juego","#1b0f0f","#b91c1c","#fde68a"],["astro","Astro Bot","Juego","#0a1230","#22d3ee","#a78bfa"],["gt","Gran Turismo","Juego","#0a0a0a","#e11d48","#f8fafc"],["ratchet","Ratchet & Clank","Juego","#0a1a3a","#f59e0b","#3b82f6"],["returnal","Returnal","Juego","#05080f","#be123c","#14b8a6"],["uncharted","Uncharted","Juego","#1a1206","#b45309","#fde68a"],["bloodborne","Bloodborne","Juego","#0d0a12","#7f1d1d","#7c6f64"],["demons","Demon's Souls","Juego","#0b0c10","#64748b","#e2e8f0"],["deathstranding","Death Stranding","Juego","#0a0f14","#38bdf8","#64748b"],["crash","Crash Bandicoot","Juego","#1a0f05","#f97316","#22c55e"],["spyro","Spyro the Dragon","Juego","#1a0b2a","#a855f7","#facc15"],["mgs","Metal Gear Solid","Juego","#0a0d0a","#16a34a","#a3e635"],["ff7","Final Fantasy VII","Juego","#04120f","#10b981","#38bdf8"],["tekken3","Tekken 3","Juego","#120808","#dc2626","#facc15"],["sotc","Shadow of the Colossus","Juego","#0e1210","#a8a29e","#78716c"],["ico","ICO","Juego","#0e1318","#e2e8f0","#7dd3fc"],["lbp","LittleBigPlanet","Juego","#1a0f06","#f59e0b","#ec4899"],["infamous","inFAMOUS","Juego","#0a0a14","#2563eb","#f59e0b"],["killzone","Killzone","Juego","#0a0a0a","#b91c1c","#f97316"],["sackboy","Sackboy: A Big Adventure","Juego","#0b1020","#f97316","#22c55e"],
-["nitroplay","NitroPlay original","Original","#0f1424","#3d7bff","#6ea8ff"]];
+var STATE={bg:"__BG__",theme:"__THEME__",quality:__QUALITY__,frame:__FRAME__,account:"__ACCOUNT__",tab:"__TAB__",error:"__ERROR__"};
+var T=[["nitroplay","NitroPlay","Original","#0f1424","#3d7bff","#6ea8ff"]];
 function $(i){return document.getElementById(i)}
 function send(m){try{window.ipc.postMessage(m)}catch(e){}}
 function applyTheme(id){var t=T.filter(function(x){return x[0]==id})[0]||T[T.length-1];var r=document.documentElement.style;r.setProperty("--c1",t[3]);r.setProperty("--c2",t[4]);r.setProperty("--c3",t[5]);STATE.theme=t[0];$("temaTxt").textContent=t[1]+" ("+t[2]+")";var a=document.querySelectorAll(".t");for(var i=0;i<a.length;i++)a[i].className="t"+(a[i].getAttribute("data-id")==t[0]?" on":"")}
 function pick(id){applyTheme(id);send("theme:"+id)}
 function go(t){STATE.tab=t;var s=document.querySelectorAll("section");for(var i=0;i<s.length;i++)s[i].className=(s[i].id==t?"on":"");var b=document.querySelectorAll("nav button");for(var j=0;j<b.length;j++)b[j].className=(b[j].getAttribute("data-t")==t?"on":"")}
 function login(){send("login")}
-function pinGo(){var v=$("pin").value,t=$("pinTxt");if(v.length!=8){t.textContent="El PIN tiene 8 dígitos.";return}t.textContent="PIN correcto de formato. Esta app todavía no puede completar el registro (no está implementado en Rust): escríbelo ahora en NitroPlay Android → Vincular consola. No se guarda en ningún sitio.";$("pin").value=""}
+window.link=function(ip,kind){var v=$("pin").value,t=$("pinTxt");if(v.length!=8){t.textContent="Escribe primero el PIN de 8 dígitos.";return}t.textContent="Vinculando con "+ip+"...";send("reg:"+ip+"|"+kind+"|"+v)};
+window.regDone=function(ok,msg){$("pinTxt").textContent=msg;if(ok)$("pin").value=""};
 function scan(){$("scanTxt").textContent="Buscando consolas (unos 4 segundos)...";send("scan")}
-function showConsoles(a){var t=$("scanTxt"),l=$("cl"),h="";if(!a.length){t.textContent="No encontré consolas. Comprueba que está encendida (o en reposo) y en la misma red.";l.innerHTML="";return}t.textContent="Encontradas: "+a.length+". Para vincular, abre NitroPlay en Android, toca la consola y escribe el PIN de 8 dígitos.";for(var i=0;i<a.length;i++){h+="<div class=\"card\"><b>"+(a[i].n||"Consola")+"</b><span class=\"badge\">"+a[i].t+"</span><span class=\"badge\">"+a[i].s+"</span><p>Dirección: <code>"+a[i].ip+"</code></p></div>"}l.innerHTML=h}
+function showConsoles(a){var t=$("scanTxt"),l=$("cl"),h="";if(!a.length){t.textContent="No encontré consolas. Comprueba que está encendida (o en reposo) y en la misma red.";l.innerHTML="";return}t.textContent="Encontradas: "+a.length+".";for(var i=0;i<a.length;i++){var k=/PS5/i.test(a[i].t)?"ps5":"ps4";h+="<div class=\"card\"><b>"+(a[i].n||"Consola")+"</b> <span class=\"badge\">"+a[i].t+"</span> <span class=\"badge\">"+a[i].s+"</span><p>Dirección: <code>"+a[i].ip+"</code></p><button class=\"p\" onclick=\"link('"+a[i].ip+"','"+k+"')\">Vincular</button></div>"}l.innerHTML=h}
 function applyBg(d){var b=document.body.style;if(d){b.backgroundImage="linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),url("+d+")";b.backgroundSize="cover";b.backgroundPosition="center"}else{b.backgroundImage="";b.backgroundSize=""}}
 function setBg(f){if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,1920/im.width),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);var d=c.toDataURL("image/jpeg",0.85);applyBg(d);send("bg:"+d)};im.src=r.result};r.readAsDataURL(f)}
 function clearBg(){applyBg("");send("bg-clear")}
 function copyId(){var r=document.createRange();r.selectNode($("idVal"));var s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand("copy");$("cp").textContent="Copiado"}
 (function(){
-var g=$("grid");g.className="grid";
-var grp=["Todos"];for(var q=0;q<T.length;q++){if(grp.indexOf(T[q][2])<0)grp.push(T[q][2])}
-window.filt=function(n){var a=document.querySelectorAll(".t");for(var i=0;i<a.length;i++)a[i].style.display=(n=="Todos"||a[i].getAttribute("data-g")==n)?"":"none";var c=document.querySelectorAll(".chip");for(var j=0;j<c.length;j++)c[j].className="chip"+(c[j].getAttribute("data-g")==n?" on":"")};
+var grp=["PlayStation oficial","Temas PS4","Retro","Nintendo","Todos","Mis fondos"];
+window.filt=function(n){var c=document.querySelectorAll(".chip");for(var j=0;j<c.length;j++)c[j].className="chip"+(c[j].getAttribute("data-g")==n?" on":"")};
 var ch="";for(var w=0;w<grp.length;w++){ch+='<button class="chip" data-g="'+grp[w]+'" onclick="filt(this.getAttribute(\'data-g\'))">'+grp[w]+'</button>'}$("chips").innerHTML=ch;
-var h="";for(var i=0;i<T.length;i++){var t=T[i];h+='<div class="t" data-id="'+t[0]+'" data-g="'+t[2]+'" onclick="pick(\''+t[0]+'\')"><div class="pv" style="--pc:'+t[4]+';background:radial-gradient(circle at 25% 25%,'+t[4]+'aa,transparent 60%),radial-gradient(circle at 80% 80%,'+t[5]+'88,transparent 55%),linear-gradient(160deg,'+t[3]+',#000)"><i></i><b></b><u></u></div><div class="tn"><span>'+t[1]+'<br><small>'+t[2]+'</small></span><span class="tick">Aplicado</span></div></div>'}
-g.innerHTML=h;filt("Todos");$("cnt").textContent=T.length+" estilos";
+filt("Todos");$("cnt").textContent="0 fondos";
+window.sgSearch=function(){$("sgMsg").textContent="Búsqueda pendiente: falta conectar tu clave de SteamGridDB."};
+window.loadQ=function(){var q=STATE.quality||{};var m={q_res:"res",q_fps:"fps",q_br:"br",q_kbps:"kbps",q_codec:"codec",q_api:"api",q_sharp:"sharp"};for(var k in m){if(q[m[k]]!==undefined)$(k).value=q[m[k]]}$("q_hdr").checked=!!q.hdr};
+window.saveQ=function(){var hdr=$("q_hdr").checked,codec=$("q_codec").value;if(hdr&&codec!="h265"){$("qMsg").textContent="El HDR necesita H.265: cambia el códec o desactiva HDR.";return}var q={res:$("q_res").value,fps:$("q_fps").value,br:$("q_br").value,kbps:$("q_kbps").value||"0",codec:codec,api:$("q_api").value,sharp:$("q_sharp").value,hdr:hdr};send("quality:"+JSON.stringify(q));$("qMsg").textContent="Guardado. Se aplica en la próxima transmisión."};
+loadQ();
 var bs=document.querySelectorAll("nav button");for(var k=0;k<bs.length;k++){bs[k].onclick=(function(n){return function(){go(n.getAttribute("data-t"))}})(bs[k])}
 var has=STATE.account&&STATE.account.charAt(0)!="_";
 if(has){$("idVal").textContent=STATE.account;$("idBox").style.display="block";$("loginBtn").textContent="Iniciar sesión de nuevo";$("estado").textContent="conectada";$("estadoTxt").textContent="Tu Account-ID está guardado en este equipo."}
@@ -98,4 +133,26 @@ else{$("estado").textContent="sin iniciar";$("estadoTxt").textContent="Aún no h
 if(STATE.error&&STATE.error.charAt(0)!="_"){var e=$("err");e.style.display="block";e.textContent=STATE.error}
 if(STATE.bg&&STATE.bg.charAt(0)!="_")applyBg(STATE.bg);applyTheme(STATE.theme);go(STATE.tab);
 })();
+
+var BF=[["none","Sin marco"],["fire","Nórdico / Fuego"],["neon","Neón Cyberpunk"],["ps","PlayStation Clásico"],["crt","Retro CRT"],["swords","Espadas gemelas"],["crates","Cajas de peligro"],["mech","Máquina cibernética"],["heist","Atraco"]],PK=[];
+var SWORD='<svg viewBox="0 0 40 200" xmlns="http://www.w3.org/2000/svg"><polygon points="20,3 27,32 25.5,128 20,136 14.5,128 13,32" fill="#e8eef5" stroke="#1f2833" stroke-width="1.4"/><polygon points="20,3 27,32 25.5,128 20,136" fill="#9fb0c3"/><line x1="20" y1="22" x2="20" y2="122" stroke="#3a4a5e" stroke-width="1.6"/><path d="M20 40l2.2 4-2.2 4-2.2-4z M20 62l2.2 4-2.2 4-2.2-4z M20 84l2.2 4-2.2 4-2.2-4z" fill="#ff7a1a"/><path d="M3 126q8 4 17 8q9-4 17-8l-3 14q-7-3-14-4q-7 1-14 4z" fill="#b8741c" stroke="#3a2008" stroke-width="1"/><rect x="17.5" y="138" width="5" height="34" rx="2" fill="#5b2a14" stroke="#2a1208"/><path d="M18 144h4M18 150h4M18 156h4M18 162h4" stroke="#c98a3a" stroke-width="1"/><circle cx="20" cy="180" r="7" fill="#b8741c" stroke="#3a2008" stroke-width="1.2"/><circle cx="20" cy="180" r="2.6" fill="#ff7a1a"/></svg>';
+var CORN={crates:'<svg viewBox="0 0 48 48"><rect x="2" y="2" width="44" height="44" fill="#c8883a" stroke="#4a2a0a" stroke-width="3"/><path d="M2 2L46 46M46 2L2 46" stroke="#4a2a0a" stroke-width="3"/><rect x="2" y="18" width="44" height="12" fill="#f5c400" stroke="#1a1a1a" stroke-width="2"/><circle cx="24" cy="24" r="4.5" fill="#1a1a1a"/><path d="M24 19.5v-4" stroke="#1a1a1a" stroke-width="2"/></svg>',heist_P:'<svg viewBox="0 0 64 44"><path d="M2 6H50V18H36L32 22H26L30 42H14L12 20H2Z" fill="#7b8693" stroke="#10151a" stroke-width="3" stroke-linejoin="round"/><rect x="44" y="4" width="18" height="12" rx="2" fill="#a9b3bf" stroke="#10151a" stroke-width="3"/><circle cx="31" cy="12" r="7" fill="#c3ccd6" stroke="#10151a" stroke-width="3"/><circle cx="31" cy="12" r="2.4" fill="#10151a"/><path d="M14 24L17 38" stroke="#10151a" stroke-width="2.5"/></svg>',heist_B:'<svg viewBox="0 0 48 48"><path d="M17 4L20 11H28L31 4Q24 7 17 4Z" fill="#d9c27a" stroke="#1d2b1f" stroke-width="2"/><path d="M20 11Q4 22 6 38Q8 45 24 45Q40 45 42 38Q44 22 28 11Z" fill="#3fae55" stroke="#1d2b1f" stroke-width="2.5" stroke-linejoin="round"/><path d="M19 12H29" stroke="#1d2b1f" stroke-width="3"/><path d="M28 24H21Q18 24 18 27Q18 30 21 30H27Q30 30 30 33Q30 36 27 36H19M24 21V39" fill="none" stroke="#f4f1d0" stroke-width="3" stroke-linecap="round"/></svg>',mech:'<svg viewBox="0 0 60 60"><path d="M2 2H40L52 14V22H44V18L36 10H10V36H2Z" fill="#6f8aa6" stroke="#0d141c" stroke-width="2.5"/><path d="M6 6H38M6 6V32" stroke="#19e3ff" stroke-width="3"/><circle cx="21" cy="23" r="6" fill="#19e3ff" stroke="#0d141c" stroke-width="2"/><circle cx="21" cy="23" r="2" fill="#0d141c"/></svg>'};
+var SYM={ps:["△","○","✕","□"],fire:["ᚦ","ᛉ","ᛟ","ᚱ"]};
+function drawFl(){var h="",i,a=BF.concat(PK.map(function(p){return[p.id,p.n+" ("+p.s+")"]}));for(i=0;i<a.length;i++)h+='<button class="chip'+(STATE.frame.id==a[i][0]?" on":"")+'" data-f="'+a[i][0]+'" onclick="pickFrame(this.getAttribute(\'data-f\'))">'+a[i][1]+'</button>';$("flist").innerHTML=h}
+function setTh(v){STATE.frame.th=+v;document.documentElement.style.setProperty("--th",v+"px")}
+function applyFrame(){var sw=document.querySelectorAll(".sw");for(var k=0;k<sw.length;k++)if(!sw[k].firstChild)sw[k].innerHTML=SWORD;var f=STATE.frame,fr=$("fr"),im=$("frimg"),vd=$("vid"),user=f.id.indexOf("u-")==0,p=null,i;
+if(user)for(i=0;i<PK.length;i++)if(PK[i].id==f.id)p=PK[i];
+if(p&&!p.img){if(!p.ask){p.ask=1;send("pack:"+p.id)}p=null}
+var show=f.on&&f.id!="none"&&(!user||p);
+fr.className="fr "+(show&&!user?"on f-"+f.id:"");im.style.display=show&&user?"block":"none";
+var sy=SYM[f.id]||["","","",""],c=fr.children;for(i=0;i<4;i++){if(f.id=="heist")c[i].innerHTML=i<2?CORN.heist_P:CORN.heist_B;else if(CORN[f.id])c[i].innerHTML=CORN[f.id];else c[i].textContent=sy[i]}
+if(show&&user){im.src=p.img;vd.style.cssText="inset:auto;left:"+p.vx+"%;top:"+p.vy+"%;width:"+p.vw+"%;height:"+p.vh+"%"}else vd.style.cssText=(show&&f.id=="swords")?"inset:0 9.5%":"";
+$("ftog").textContent="Marco: "+(f.on?"sí":"no")+" (F9)";$("fth").value=f.th;setTh(f.th);drawFl()}
+function pickFrame(id){STATE.frame.id=id;applyFrame();send("frame:"+id)}
+function toggleFrame(){STATE.frame.on=!STATE.frame.on;applyFrame();send("frame-on:"+(STATE.frame.on?1:0))}
+function showPacks(a){var old={};for(var i=0;i<PK.length;i++)old[PK[i].id]=PK[i];PK=a.map(function(p){return old[p.id]&&old[p.id].img?Object.assign(p,{img:old[p.id].img}):p});applyFrame()}
+function packImg(id,d){for(var i=0;i<PK.length;i++)if(PK[i].id==id)PK[i].img=d;applyFrame()}
+function fsState(on){document.body.classList.toggle("fs",on);if(!on)document.body.classList.remove("showfr")}
+document.addEventListener("keydown",function(e){if(e.key=="F9"){e.preventDefault();if(document.body.classList.contains("fs"))document.body.classList.toggle("showfr");else toggleFrame()}else if(e.key=="F11"){e.preventDefault();send("fs")}else if(e.key=="Escape"&&document.body.classList.contains("fs"))send("fs")});
+(function(){var q=STATE.quality||{};$("vq").textContent=(q.res||"1080")+"p · "+(q.fps||"60")+" FPS"+(q.hdr?" · HDR":"");applyFrame();send("packs")})();
 </script></body></html>

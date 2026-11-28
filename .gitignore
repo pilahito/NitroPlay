@@ -39,3 +39,15 @@ chiaki.conf
 .cache/
 *.vscode
 site/
+
+
+# NitroPlay: datos locales del usuario y artefactos (nunca al repositorio)
+*.zip
+originales/
+marcos_nuevos/
+wallpapers*/
+/_tmp_*
+/_win*/
+/_apk/
+*.log
+Claude outputs/

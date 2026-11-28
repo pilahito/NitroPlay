@@ -1,6 +1,8 @@
 [workspace]
 resolver = "2"
-members = ["psn-account", "psn-jni", "nitroplay-core", "nitroplay-cli", "nitroplay-gui"]
+members = ["psn-account", "psn-jni", "nitroplay-core", "nitroplay-ref-sys", "nitroplay-cli", "nitroplay-gui"]
+# nitroplay-ref-sys solo se usa en pruebas (feature ref-c) y necesita clang: no se compila por defecto.
+default-members = ["psn-account", "psn-jni", "nitroplay-core", "nitroplay-cli", "nitroplay-gui"]
 
 
 

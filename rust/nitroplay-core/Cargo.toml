@@ -2,6 +2,17 @@
 name = "nitroplay-core"
 version = "0.1.0"
 edition = "2021"
-description = "Marco de NitroPlay: descubrimiento, PIN/registro y sesion de juego remoto (sin dependencias)"
+description = "Nucleo de NitroPlay en Rust: descubrimiento, PIN, registro y (en curso) sesion de Remote Play"
+license = "AGPL-3.0-only"
+
+[features]
+# Pruebas de equivalencia contra la libreria C de referencia (necesita NITROPLAY_REF_BUILD_DIR, ver nitroplay-ref-sys). No entra en el binario final.
+ref-c = ["dep:nitroplay-ref-sys"]
 
 [dependencies]
+nitroplay-ref-sys = { path = "../nitroplay-ref-sys", optional = true }
+aes = "0.8"
+getrandom = "0.2"
+cfb-mode = "0.8"
+hmac = "0.12"
+sha2 = "0.10"

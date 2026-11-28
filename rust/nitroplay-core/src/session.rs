@@ -1,6 +1,6 @@
 //! FASE 3 (sin implementar): sesion de juego remoto (red local, luego Internet por PSN).
-//! La transmision de video/audio (HDR, H265) sigue en el nucleo chiaki-ng hasta que
-//! esta fase tenga prueba real contra una PS5.
+//! La transmision de video/audio (HDR, H265) aun no esta implementada; se escribira en Rust
+//! y no se dara por hecha hasta tener prueba real contra una PS5.
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Route {
